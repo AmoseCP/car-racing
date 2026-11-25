@@ -1,0 +1,99 @@
+[gd_scene format=3 uid="uid://bpi2ht2ssmy18"]
+
+[ext_resource type="Script" path="res://racing_prototype/race.gd" id="1_race"]
+[ext_resource type="Script" path="res://racing_prototype/track.gd" id="2_track"]
+[ext_resource type="Script" path="res://racing_prototype/car.gd" id="3_car"]
+[ext_resource type="PackedScene" path="res://racing_prototype/gt_car.tscn" id="4_model"]
+[ext_resource type="Script" path="res://racing_prototype/chase_camera.gd" id="5_camera"]
+[ext_resource type="Script" path="res://racing_prototype/race_weather.gd" id="6_weather"]
+[ext_resource type="Script" path="res://racing_prototype/race_lighting.gd" id="7_lighting"]
+
+[sub_resource type="StandardMaterial3D" id="Material_sand"]
+albedo_color = Color(0.67, 0.43, 0.30, 1)
+roughness = 0.94
+
+[sub_resource type="PlaneMesh" id="Mesh_ground"]
+material = SubResource("Material_sand")
+size = Vector2(1000, 1000)
+
+[sub_resource type="BoxShape3D" id="Shape_ground"]
+size = Vector3(1000, 0.5, 1000)
+
+[sub_resource type="BoxShape3D" id="Shape_car"]
+size = Vector3(2.12, 1.26, 3.96)
+
+[sub_resource type="ProceduralSkyMaterial" id="Material_sky"]
+sky_top_color = Color(0.18, 0.40, 0.63, 1)
+sky_horizon_color = Color(0.85, 0.77, 0.65, 1)
+ground_horizon_color = Color(0.85, 0.77, 0.65, 1)
+ground_bottom_color = Color(0.47, 0.30, 0.26, 1)
+sun_angle_max = 9.0
+
+[sub_resource type="Sky" id="Sky_desert"]
+sky_material = SubResource("Material_sky")
+
+[sub_resource type="Environment" id="Environment_desert"]
+background_mode = 2
+sky = SubResource("Sky_desert")
+ambient_light_source = 3
+ambient_light_color = Color(0.78, 0.87, 1, 1)
+ambient_light_energy = 0.55
+tonemap_mode = 2
+fog_enabled = true
+fog_light_color = Color(0.84, 0.70, 0.57, 1)
+fog_density = 0.0022
+
+[node name="RedMesa" type="Node3D" unique_id=1955296441]
+script = ExtResource("1_race")
+
+[node name="Track" type="Node3D" parent="."]
+script = ExtResource("2_track")
+
+[node name="Ground" type="StaticBody3D" parent="."]
+position = Vector3(0, -0.25, 0)
+
+[node name="Surface" type="MeshInstance3D" parent="Ground"]
+position = Vector3(0, 0.25, 0)
+cast_shadow = 0
+mesh = SubResource("Mesh_ground")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Ground"]
+shape = SubResource("Shape_ground")
+
+[node name="Car" type="CharacterBody3D" parent="."]
+position = Vector3(47, 0.05, 13)
+floor_snap_length = 0.22
+script = ExtResource("3_car")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Car"]
+position = Vector3(0, 0.63, 0)
+shape = SubResource("Shape_car")
+
+[node name="CarModel" parent="Car" instance=ExtResource("4_model")]
+
+[node name="ChaseCamera" type="Camera3D" parent="."]
+position = Vector3(47, 3.3, 20.9)
+rotation = Vector3(-0.1625, 0, 0)
+current = true
+fov = 65.0
+far = 400.0
+script = ExtResource("5_camera")
+
+[node name="Sun" type="DirectionalLight3D" parent="."]
+rotation_degrees = Vector3(-38, -42, 0)
+light_color = Color(1, 0.87, 0.7, 1)
+light_energy = 1.6
+shadow_enabled = true
+directional_shadow_max_distance = 160.0
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+environment = SubResource("Environment_desert")
+
+[node name="Weather" type="Node3D" parent="."]
+process_mode = 3
+script = ExtResource("6_weather")
+
+[node name="Lighting" type="Node" parent="."]
+script = ExtResource("7_lighting")
+
+[node name="HUD" type="CanvasLayer" parent="."]

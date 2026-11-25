@@ -1,0 +1,8 @@
+[gd_scene format=3]
+
+[ext_resource type="PackedScene" path="res://racing_prototype/art/models/gt_race_car.glb" id="1_gt"]
+
+[node name="CarModel" type="Node3D"]
+
+[node name="GT" parent="." instance=ExtResource("1_gt")]
+transform = Transform3D(-0.94, 0, 0, 0, 0.92, 0, 0, 0, -0.815, 0, 0, 0.057)

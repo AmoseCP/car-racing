@@ -1,0 +1,65 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://racing_prototype/vehicle_preview.gd" id="1_preview"]
+
+[sub_resource type="Environment" id="Environment_showroom"]
+background_mode = 1
+background_color = Color(0.052, 0.078, 0.115, 1)
+ambient_light_source = 2
+ambient_light_color = Color(0.76, 0.83, 1, 1)
+ambient_light_energy = 0.62
+tonemap_mode = 2
+
+[sub_resource type="StandardMaterial3D" id="Material_platform"]
+albedo_color = Color(0.17, 0.23, 0.31, 1)
+metallic = 0.35
+roughness = 0.5
+
+[sub_resource type="CylinderMesh" id="Mesh_platform"]
+material = SubResource("Material_platform")
+top_radius = 2.9
+bottom_radius = 2.97
+height = 0.13
+radial_segments = 64
+rings = 0
+
+[node name="VehiclePreview" type="SubViewportContainer"]
+custom_minimum_size = Vector2(530, 255)
+size_flags_horizontal = 3
+mouse_filter = 2
+stretch = true
+script = ExtResource("1_preview")
+
+[node name="Viewport" type="SubViewport" parent="."]
+own_world_3d = true
+gui_disable_input = true
+msaa_3d = 1
+size = Vector2i(530, 255)
+render_target_update_mode = 2
+
+[node name="Environment" type="WorldEnvironment" parent="Viewport"]
+environment = SubResource("Environment_showroom")
+
+[node name="KeyLight" type="DirectionalLight3D" parent="Viewport"]
+rotation_degrees = Vector3(-44, -35, 0)
+light_color = Color(1, 0.91, 0.81, 1)
+light_energy = 1.68
+shadow_enabled = true
+directional_shadow_max_distance = 18.0
+
+[node name="FillLight" type="DirectionalLight3D" parent="Viewport"]
+rotation_degrees = Vector3(-28, 139, 0)
+light_color = Color(0.62, 0.76, 1, 1)
+light_energy = 0.82
+
+[node name="Platform" type="MeshInstance3D" parent="Viewport"]
+position = Vector3(0, -0.08, 0)
+mesh = SubResource("Mesh_platform")
+
+[node name="Turntable" type="Node3D" parent="Viewport"]
+
+[node name="Camera3D" type="Camera3D" parent="Viewport"]
+position = Vector3(5.6, 3.3, -5.7)
+projection = 1
+current = true
+size = 4.05

@@ -1,0 +1,25 @@
+CarRacing third-party art
+
+GT Race Car, Rally Car and Endurance Prototype by vinish.dev
+Source: https://vinish.dev/free-3d-models/racing
+License: Creative Commons Attribution 4.0 International
+https://creativecommons.org/licenses/by/4.0/
+CarRacing reorients and scales the original model, animates the wheels and modifies the paint and tail-light materials.
+
+The following Poly Haven assets are available under CC0 1.0.
+https://polyhaven.com/license
+
+Asphalt Track: https://polyhaven.com/a/asphalt_track
+Concrete Slab Wall: https://polyhaven.com/a/concrete_slab_wall
+Red Sand: https://polyhaven.com/a/red_sand
+Leafy Grass: https://polyhaven.com/a/leafy_grass
+Forest Ground 04: https://polyhaven.com/a/forest_ground_04
+Kloppenheim 06 (Pure Sky): https://polyhaven.com/a/kloppenheim_06_puresky
+Kloofendal 48d Partly Cloudy (Pure Sky): https://polyhaven.com/a/kloofendal_48d_partly_cloudy_puresky
+Industrial Sunset (Pure Sky): https://polyhaven.com/a/industrial_sunset_puresky
+Qwantani Night (Pure Sky): https://polyhaven.com/a/qwantani_night_puresky
+Namaqualand Boulder 04: https://polyhaven.com/a/namaqualand_boulder_04
+Modular Urban Apartments Facade: https://polyhaven.com/a/modular_urban_apartments_facade
+Grass Medium 01: https://polyhaven.com/a/grass_medium_01
+Pine Sapling Small: https://polyhaven.com/a/pine_sapling_small
+Fir Sapling (simplified model and rendered background foliage): https://polyhaven.com/a/fir_sapling

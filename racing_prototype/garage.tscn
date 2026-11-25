@@ -1,0 +1,14 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://racing_prototype/garage.gd" id="1_garage"]
+[ext_resource type="Script" path="res://racing_prototype/motion_steering.gd" id="2_motion"]
+
+[node name="CarRacing" type="Node"]
+process_mode = 3
+script = ExtResource("1_garage")
+
+[node name="Overlay" type="CanvasLayer" parent="."]
+layer = 4
+
+[node name="MotionSteering" type="Node" parent="."]
+script = ExtResource("2_motion")
