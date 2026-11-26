@@ -18,6 +18,8 @@ var direction: int
 var progress: float
 var speed: float
 var cruise_speed: float
+## True while following a slower car or stopping for a signal, sign or crossing.
+var held_up := false
 var half_length: float
 var cleared_stop: int = -1
 var waiting_at: int = -1

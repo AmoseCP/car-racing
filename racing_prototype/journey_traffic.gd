@@ -9,6 +9,16 @@ const Vehicle := preload("res://racing_prototype/traffic_vehicle.gd")
 const Units := preload("res://racing_prototype/units.gd")
 const CARS_PER_LANE := 3
 const BRAKING := 7.0
+## Margin kept inside the legal band, and the gentle rates used to meet the
+## next zone's band before its sign.
+const BAND_MARGIN_MPH := 1.5
+## Tighter margin used only to bridge a large limit change (45 -> 65 mph),
+## where the comfortable bands of the two zones do not overlap.
+const ZONE_MARGIN_MPH := 0.3
+const ZONE_BRAKING := 3.0
+const ZONE_ACCELERATION := 3.0
+const BASE_CRUISE := 22.3
+const CRUISE_SPREAD := 2.3
 
 var vehicles: Array[Vehicle] = []
 var _track: Track
@@ -101,16 +111,63 @@ func _plan(index: int, player: Vector2, delta: float, weather_factor: float) -> 
 		if _must_stop(car, site, gap, delta) and gap < space:
 			space = gap
 			ahead_speed = 0.0
-	var target := minf(_free_speed(car, weather_factor),
-		sqrt(ahead_speed * ahead_speed + maxf(space, 0.0) * (2.0 * BRAKING)))
+	var free := _free_speed(car, weather_factor)
+	var held := sqrt(ahead_speed * ahead_speed + maxf(space, 0.0) * (2.0 * BRAKING))
+	# Still "held up" while pulling away until back at cruising pace.
+	car.held_up = held < free or (car.held_up and car.speed < free - 0.3)
+	var target := minf(free, held)
 	var natural := move_toward(car.speed, target, (BRAKING if target < car.speed else 3.6) * delta)
 	var permitted := maxf(0.0, space) + ahead_speed * delta
 	_motions[index] = minf(natural * delta, permitted)
 	car.speed = _motions[index] / delta
 
 
+## Cruising speed (m/s). Each car keeps its own pace, but always inside the
+## legal band of the zone it is in, and it meets the next zone's band before
+## reaching that sign. Bad weather only slows cars within the band.
 func _free_speed(vehicle: Vehicle, weather_factor: float) -> float:
-	return vehicle.cruise_speed * float(_track.speed_limit(vehicle.progress)) / 55.0 * weather_factor
+	var limit := float(_track.speed_limit(vehicle.progress))
+	var pace := clampf((vehicle.cruise_speed - BASE_CRUISE) / CRUISE_SPREAD, 0.0, 1.0)
+	var desired := limit - 5.0 + 10.0 * pace - (1.0 - weather_factor) * 20.0
+	var low := _band_floor(limit)
+	var high := _band_ceiling(limit)
+	# Limits change at chunk boundaries: meet the next zone's band right at its sign.
+	var boundary := Track.CHUNK * (ceilf(vehicle.progress / Track.CHUNK) if vehicle.direction > 0 else (
+		floorf(vehicle.progress / Track.CHUNK)))
+	var distance := absf(boundary - vehicle.progress)
+	var next := float(_track.speed_limit(boundary + vehicle.direction * 0.5))
+	if next != limit:
+		var bounds := _meet_next_zone(limit, next, distance, low, high, BAND_MARGIN_MPH)
+		if bounds.x > bounds.y:
+			bounds = _meet_next_zone(limit, next, distance, low, high, ZONE_MARGIN_MPH)
+		low = bounds.x
+		high = bounds.y
+	return clampf(desired, minf(low, high), high) / Units.MPH
+
+
+## Speed bounds (mph) that reach the next zone's band exactly at its sign.
+## With the tight margin, the current zone's bound on the conflicting side is
+## relaxed to its own tight edge so the two bands can be bridged.
+func _meet_next_zone(limit: float, next: float, distance: float, low: float, high: float,
+		margin: float) -> Vector2:
+	var next_high := _band_ceiling(next, margin) / Units.MPH
+	var next_low := _band_floor(next, margin) / Units.MPH
+	high = minf(high, sqrt(next_high * next_high + 2.0 * ZONE_BRAKING * distance) * Units.MPH)
+	low = maxf(low, sqrt(maxf(0.0, next_low * next_low - 2.0 * ZONE_ACCELERATION * distance)) * Units.MPH)
+	if margin < BAND_MARGIN_MPH:
+		if next > limit:
+			high = maxf(high, minf(low, _band_ceiling(limit, margin)))
+		else:
+			low = minf(low, maxf(high, _band_floor(limit, margin)))
+	return Vector2(low, high)
+
+
+func _band_floor(limit: float, margin := BAND_MARGIN_MPH) -> float:
+	return limit - Track.UNDER_LIMIT_MPH + margin
+
+
+func _band_ceiling(limit: float, margin := BAND_MARGIN_MPH) -> float:
+	return limit + Track.OVER_LIMIT_MPH - margin
 
 
 func needs_to_slow(player: Vector2, minimum_mph: int) -> bool:

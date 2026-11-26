@@ -15,6 +15,10 @@ const ROUTE := [
 ]
 const SECTION := [0, 0, 1, 1, 1, 2, 2, 2, 3, 3, 4, 4, 4]
 ## Posted limits in mph.
+## Legal band around the posted limit, shared by the player's rules and traffic:
+## reaching limit + OVER or dropping to limit - UNDER counts as a violation.
+const OVER_LIMIT_MPH := 11
+const UNDER_LIMIT_MPH := 10
 const SPEED_LIMITS := {&"grassland": 55, &"forest": 45, &"city": 30, &"tunnel": 45, &"desert": 65}
 ## Drive-through fuel lanes: in the right lane of every fourth chunk (none inside tunnels).
 const STATION_EVERY := 4
@@ -28,6 +32,8 @@ const CANOPY_WIDTH := 12.5
 var origin := 0.0
 var weather_materials: Array[ShaderMaterial] = []
 var sites: Array[ControlSite] = []
+## Fuel-station roofs by chunk index, faded out while the player drives under them.
+var _canopies: Dictionary[int, Dictionary] = {}
 
 var _chunks: Dictionary[int, Node3D] = {}
 var _ground: Dictionary[StringName, ShaderMaterial] = {}
@@ -173,6 +179,7 @@ func stream(progress: float) -> float:
 			remove_child(chunk)
 			chunk.queue_free()
 			_chunks.erase(previous)
+			_canopies.erase(previous)
 	for next in range(maxi(index - 1, -1), index + 4):
 		if not _chunks.has(next):
 			_add_chunk(next)
@@ -213,13 +220,13 @@ func _add_chunk(index: int) -> void:
 	if index == 0 or (index > 0 and biome(start - 1.0) != id):
 		_region_sign(chunk, start, id)
 	if has_station(index):
-		_fuel_station(chunk, start)
+		_fuel_station(chunk, start, index)
 	var sign_offset := 29.0 if index == 0 else 0.0
 	_speed_limit_sign(chunk, start, sign_offset, 1)
 	_speed_limit_sign(chunk, start, sign_offset, -1)
 
 
-func _fuel_station(chunk: Node3D, start: float) -> void:
+func _fuel_station(chunk: Node3D, start: float, index: int) -> void:
 	var lane_paint := _material("1b8f86", 0.35)
 	var stripe := _material("7ff5dc", 0.9)
 	var canopy := _material("e9eef0")
@@ -230,8 +237,8 @@ func _fuel_station(chunk: Node3D, start: float) -> void:
 	var length := STATION_TO - STATION_FROM - CANOPY_INSET * 2.0
 	var x := road_x(start + middle)
 	var roof := CANOPY_CLEARANCE + 0.16
-	_box(chunk, Vector3(CANOPY_WIDTH, 0.45, length), Vector3(x + SHOULDER + 0.6, roof + 0.225, -middle), canopy)
-	_box(chunk, Vector3(CANOPY_WIDTH + 0.1, 0.16, length + 0.1), Vector3(x + SHOULDER + 0.6, CANOPY_CLEARANCE + 0.08, -middle), trim)
+	var slab := _box(chunk, Vector3(CANOPY_WIDTH, 0.45, length), Vector3(x + SHOULDER + 0.6, roof + 0.225, -middle), canopy)
+	var edge := _box(chunk, Vector3(CANOPY_WIDTH + 0.1, 0.16, length + 0.1), Vector3(x + SHOULDER + 0.6, CANOPY_CLEARANCE + 0.08, -middle), trim)
 	for z: float in [middle - length * 0.4, middle, middle + length * 0.4]:
 		var post_x := road_x(start + z) + SHOULDER + 5.8
 		_box(chunk, Vector3(0.36, roof, 0.36), Vector3(post_x, roof * 0.5, -z), _rail)
@@ -247,6 +254,27 @@ func _fuel_station(chunk: Node3D, start: float) -> void:
 	banner.outline_size = 0
 	banner.position = Vector3(x + SHOULDER + 0.6, roof + 0.24, -STATION_FROM - CANOPY_INSET + 0.3)
 	chunk.add_child(banner)
+	_canopies[index] = {
+		"from": start + STATION_FROM + CANOPY_INSET, "to": start + STATION_TO - CANOPY_INSET,
+		"roof": [slab, edge], "banner": banner, "ink": banner.modulate,
+	}
+
+
+## Fades each canopy out as the player approaches so the roof never fills the
+## view, and back in once the chase camera has left it behind.
+func fade_canopies(progress: float) -> void:
+	for canopy: Dictionary in _canopies.values():
+		var hidden := 1.0
+		if progress < canopy.from:
+			hidden = 1.0 - smoothstep(18.0, 45.0, canopy.from - progress)
+		elif progress > canopy.to:
+			hidden = 1.0 - smoothstep(20.0, 36.0, progress - canopy.to)
+		for part: MeshInstance3D in canopy.roof:
+			part.transparency = hidden
+			part.visible = hidden < 0.99
+		var banner: Label3D = canopy.banner
+		banner.modulate = Color(canopy.ink, 1.0 - hidden)
+		banner.visible = hidden < 0.99
 
 
 func _strip(chunk: Node3D, start: float, left: float, right: float, low: float, high: float,

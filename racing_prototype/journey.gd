@@ -20,8 +20,8 @@ const Vehicles := preload("res://racing_prototype/vehicles.gd")
 const SpeedLines := preload("res://racing_prototype/speed_lines.gd")
 const HIT_THRESHOLD := 2.8
 ## Tolerances in mph.
-const OVER_LIMIT := 11
-const UNDER_LIMIT := 10
+const OVER_LIMIT := Track.OVER_LIMIT_MPH
+const UNDER_LIMIT := Track.UNDER_LIMIT_MPH
 const SPEED_CHECK_SECONDS := 1.2
 const SPEED_REPEAT_SECONDS := 4.0
 const START_GRACE_SECONDS := 3.5
@@ -116,6 +116,7 @@ func _physics_process(delta: float) -> void:
 	_impact_cooldown = maxf(0.0, _impact_cooldown - delta)
 	var location := _track.road_location(_car.position)
 	var shift := _track.stream(location.x)
+	_track.fade_canopies(location.x)
 	if shift != 0.0:
 		_car.position.z += shift
 		_car.reset_physics_interpolation()
