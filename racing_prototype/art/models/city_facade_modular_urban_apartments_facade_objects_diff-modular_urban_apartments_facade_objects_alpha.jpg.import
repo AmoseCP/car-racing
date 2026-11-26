@@ -4,8 +4,9 @@ importer="texture"
 type="CompressedTexture2D"
 uid="uid://mnp30cq100kd"
 path.s3tc="res://.godot/imported/city_facade_modular_urban_apartments_facade_objects_diff-modular_urban_apartments_facade_objects_alpha.jpg-e547edda215e53ccd5f800b9ee3ef6a3.s3tc.ctex"
+path.etc2="res://.godot/imported/city_facade_modular_urban_apartments_facade_objects_diff-modular_urban_apartments_facade_objects_alpha.jpg-e547edda215e53ccd5f800b9ee3ef6a3.etc2.ctex"
 metadata={
-"imported_formats": ["s3tc_bptc"],
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
 "vram_texture": true
 }
 generator_parameters={
@@ -15,7 +16,7 @@ generator_parameters={
 [deps]
 
 source_file="res://racing_prototype/art/models/city_facade_modular_urban_apartments_facade_objects_diff-modular_urban_apartments_facade_objects_alpha.jpg"
-dest_files=["res://.godot/imported/city_facade_modular_urban_apartments_facade_objects_diff-modular_urban_apartments_facade_objects_alpha.jpg-e547edda215e53ccd5f800b9ee3ef6a3.s3tc.ctex"]
+dest_files=["res://.godot/imported/city_facade_modular_urban_apartments_facade_objects_diff-modular_urban_apartments_facade_objects_alpha.jpg-e547edda215e53ccd5f800b9ee3ef6a3.s3tc.ctex", "res://.godot/imported/city_facade_modular_urban_apartments_facade_objects_diff-modular_urban_apartments_facade_objects_alpha.jpg-e547edda215e53ccd5f800b9ee3ef6a3.etc2.ctex"]
 
 [params]
 

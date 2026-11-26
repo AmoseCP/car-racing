@@ -66,6 +66,8 @@ var _violation_text := ""
 var _violation_notice := 0.0
 var _notice_color := VIOLATION_COLOR
 var _controls: Label
+## Seconds of driving with a controller; the control hint hides after a while.
+var _hint_seconds := 0.0
 var _manual_headlights := false
 var _rivals: Rivals
 var _player_covered := 0.0
@@ -161,7 +163,8 @@ func _physics_process(delta: float) -> void:
 	_last_position = here
 
 
-func _process(_delta: float) -> void:
+func _process(delta: float) -> void:
+	_update_hint_visibility(delta)
 	if challenge == null:
 		_time_label.text = "用时 %s    纪录 %s" % [Courses.time_text(_elapsed), Courses.time_text(_best)]
 	else:
@@ -198,6 +201,7 @@ func _unhandled_input(event: InputEvent) -> void:
 
 
 func restart() -> void:
+	_hint_seconds = 0.0
 	_car.respawn()
 	_camera.snap_to_car()
 	_last_position = _car.position
@@ -627,7 +631,16 @@ func _update_road_hud() -> void:
 	_road_panel.visible = not _road_label.text.is_empty()
 
 
+func _update_hint_visibility(delta: float) -> void:
+	# On handhelds and gamepads the hint panel only matters at the start.
+	if absf(_car.speed) > 1.0:
+		_hint_seconds += delta
+	var panel := _controls.get_parent().get_parent() as Control
+	panel.visible = not _using_pad or _hint_seconds < 8.0
+
+
 func _update_control_hint() -> void:
+	_hint_seconds = 0.0
 	if _using_pad:
 		_controls.text = "RT 油门    LT 刹车 / 倒车\n左摇杆 转向    A 手刹    B 氮气\nX 车灯    视图键 视角    Y 重试    菜单键 暂停"
 	else:

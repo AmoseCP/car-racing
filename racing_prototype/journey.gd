@@ -72,6 +72,8 @@ var _health_bar: ProgressBar
 var _conditions: Label
 var _dashboard: Dashboard
 var _controls: Label
+## Seconds of driving with a controller; the control hint hides after a while.
+var _hint_seconds := 0.0
 var _alert_panel: PanelContainer
 var _alert: Label
 var _condition_display := StyleBoxFlat.new()
@@ -141,7 +143,8 @@ func _physics_process(delta: float) -> void:
 		_finish("车辆冲出了公路范围")
 
 
-func _process(_delta: float) -> void:
+func _process(delta: float) -> void:
+	_update_hint_visibility(delta)
 	_refresh_hud()
 
 
@@ -163,6 +166,7 @@ func _unhandled_input(event: InputEvent) -> void:
 
 
 func restart() -> void:
+	_hint_seconds = 0.0
 	_track.reset()
 	_car.set_spawn(_spawn_pose())
 	_car.speed_multiplier = 1.0
@@ -495,7 +499,16 @@ func _refresh_hud() -> void:
 	_alert_panel.visible = not message.is_empty()
 
 
+func _update_hint_visibility(delta: float) -> void:
+	# On handhelds and gamepads the hint panel only matters at the start.
+	if absf(_car.speed) > 1.0:
+		_hint_seconds += delta
+	var panel := _controls.get_parent().get_parent() as Control
+	panel.visible = not _using_pad or _hint_seconds < 8.0
+
+
 func _update_controls() -> void:
+	_hint_seconds = 0.0
 	if _using_pad:
 		_controls.text = "RT 油门    LT 刹车 / 倒车    左摇杆 转向\nA 手刹    B 氮气    X 车灯    视图键 视角    菜单键 暂停"
 	else:

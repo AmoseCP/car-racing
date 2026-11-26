@@ -17,6 +17,9 @@ const WorldClock := preload("res://racing_prototype/world_clock.gd")
 const DrivingChallenge := preload("res://racing_prototype/driving_challenge.gd")
 const Audio := preload("res://racing_prototype/game_audio.gd")
 const ChaseCamera := preload("res://racing_prototype/chase_camera.gd")
+const Gamepad := preload("res://racing_prototype/gamepad.gd")
+const DeviceProfile := preload("res://racing_prototype/device_profile.gd")
+const TOAST_SECONDS := 3.2
 const SAVE_PATH := "user://racing_records.cfg"
 const FULLSCREEN_LABEL := "全屏 / 窗口    F11"
 const CLOCK_SAVE_INTERVAL := 15.0
@@ -49,11 +52,16 @@ var _course_record: Label
 var _weather_button: Button
 var _lighting_button: Button
 var _power_label: Label
-var _low_power := false
+var _performance := 0
 var _motion_return := Mode.SELECT
 var _motion_status: Label
 var _motion_toggle: Button
 var _motion_invert: Button
+var _pad_status: Label
+var _pad_live: Label
+var _vibration_toggle: Button
+var _toast: Label
+var _toast_time := 0.0
 var _livery := 0
 var _paint_return := Mode.HOME
 var _rivals_on := false
@@ -90,9 +98,15 @@ func _ready() -> void:
 		_livery = 0
 	_rivals_on = bool(_settings.get_value("race", "rivals", true))
 	ChaseCamera.view = clampi(int(_settings.get_value("controls", "camera_view", 0)), 0, ChaseCamera.VIEW_NAMES.size() - 1)
-	_low_power = bool(_settings.get_value("display", "battery_saver", false))
+	var fallback: int = DeviceProfile.default_performance()
+	if bool(_settings.get_value("display", "battery_saver", false)):
+		fallback = DeviceProfile.SAVER
+	_performance = clampi(int(_settings.get_value("display", "performance", fallback)), 0, DeviceProfile.PRESETS.size() - 1)
 	_apply_power_mode()
+	Gamepad.vibration = bool(_settings.get_value("controls", "vibration", true))
+	Input.joy_connection_changed.connect(_on_joy_connection_changed)
 	_theme = Ui.make_theme()
+	_build_toast()
 	_motion.state_changed.connect(_refresh_motion_settings)
 	_motion.reversed = bool(_settings.get_value("controls", "motion_invert", false))
 	_motion.set_enabled(bool(_settings.get_value("controls", "motion_steering", false)))
@@ -101,9 +115,55 @@ func _ready() -> void:
 	_show_home()
 
 
-func _process(_delta: float) -> void:
+func _process(delta: float) -> void:
 	if _world_clock.seconds - _saved_clock >= CLOCK_SAVE_INTERVAL:
 		_save_settings()
+	if _toast_time > 0.0:
+		_toast_time -= delta
+		_toast.visible = _toast_time > 0.0
+	if _mode == Mode.MOTION and is_instance_valid(_pad_live):
+		_pad_status.text = Gamepad.connected_summary()
+		_pad_live.text = Gamepad.live_readout()
+
+
+func _notification(what: int) -> void:
+	# Handheld overlay buttons, Game Bar and Cmd-Tab all steal focus: stop the race.
+	if what == NOTIFICATION_APPLICATION_FOCUS_OUT and _mode == Mode.DRIVE and not _quitting:
+		_show_pause()
+		Gamepad.stop_rumble()
+
+
+func _on_joy_connection_changed(device: int, connected: bool) -> void:
+	if connected:
+		_show_toast("手柄已连接：%s" % Gamepad.describe(device))
+	else:
+		_show_toast("手柄已断开")
+		if _mode == Mode.DRIVE:
+			_show_pause()
+
+
+func _build_toast() -> void:
+	var layer := CanvasLayer.new()
+	layer.name = "Toast"
+	layer.layer = 20
+	layer.process_mode = Node.PROCESS_MODE_ALWAYS
+	add_child(layer)
+	_toast = Label.new()
+	_toast.theme = _theme
+	_toast.add_theme_font_size_override("font_size", 19)
+	_toast.add_theme_stylebox_override("normal", Ui.panel(Ui.INK, Ui.GREEN, 1, 14))
+	_toast.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_toast.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	layer.add_child(_toast)
+	_toast.hide()
+
+
+func _show_toast(message: String) -> void:
+	_toast.text = message
+	_toast.reset_size()
+	_toast.set_anchors_and_offsets_preset(Control.PRESET_TOP_RIGHT, Control.PRESET_MODE_MINSIZE, 24)
+	_toast_time = TOAST_SECONDS
+	_toast.show()
 
 
 func _exit_tree() -> void:
@@ -223,7 +283,7 @@ func _show_home() -> void:
 		Ui.menu_button(rows, "车漆涂装    %s" % Vehicles.LIVERIES[_livery].name, _show_paint_selector, 38),
 		Ui.menu_button(rows, "天气    %s" % WeatherModes.NAMES[_weather_mode], _show_weather_selector, 38),
 		Ui.menu_button(rows, "昼夜    %s" % LightingModes.NAMES[_lighting_mode], _show_lighting_selector, 38),
-		Ui.menu_button(rows, "体感设置", _show_motion_settings, 38),
+		Ui.menu_button(rows, "手柄与体感", _show_motion_settings, 38),
 		Ui.menu_button(rows, "驾驶挑战", _show_challenges, 38),
 		Ui.menu_button(rows, "赛道练习", _show_selector, 38),
 	]
@@ -298,7 +358,7 @@ func _show_selector() -> void:
 	buttons.append(Ui.menu_button(rows, "赛车选择    %s" % Vehicles.DATA[_vehicle].name, _show_vehicle_selector, 35))
 	if _has_desktop_window():
 		buttons.append(Ui.menu_button(rows, FULLSCREEN_LABEL, _toggle_fullscreen, 35))
-	buttons.append(Ui.menu_button(rows, "体感设置", _show_motion_settings, 35))
+	buttons.append(Ui.menu_button(rows, "手柄与体感", _show_motion_settings, 35))
 	buttons.append(Ui.menu_button(rows, "返回主菜单", _show_home, 35))
 	Ui.link_vertical_buttons(buttons)
 	Ui.label(rows, "方向键 / 左摇杆  选择    A / Enter  确认", 17, Ui.MUTED)
@@ -474,7 +534,7 @@ func _show_pause() -> void:
 	]
 	if _has_desktop_window():
 		buttons.append(Ui.menu_button(rows, FULLSCREEN_LABEL, _toggle_fullscreen))
-	buttons.append(Ui.menu_button(rows, "体感设置", _show_motion_settings))
+	buttons.append(Ui.menu_button(rows, "手柄与体感", _show_motion_settings))
 	if is_journey or _loaded_daily:
 		buttons.append(Ui.menu_button(rows, "返回主菜单", _show_home))
 	elif _loaded_challenge.is_empty():
@@ -589,17 +649,24 @@ func _close_vehicle_selector() -> void:
 func _show_motion_settings() -> void:
 	_motion_return = _mode
 	_mode = Mode.MOTION
-	var rows := _center_menu("体感转向", 470)
-	var instructions := Ui.label(rows, "像转方向盘一样扭动掌机。按平常姿势握住后，用 R3 / G 校准中位。", 18, Ui.MUTED)
+	var rows := _center_menu("手柄与体感", 560)
+	_pad_status = Ui.label(rows, Gamepad.connected_summary(), 18, Ui.GREEN)
+	_pad_status.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	_pad_live = Ui.label(rows, Gamepad.live_readout(), 16, Ui.TEXT)
+	if OS.get_name() == "macOS":
+		var mac_note := Ui.label(rows, "Mac：Xbox 手柄请在“系统设置 → 蓝牙”中配对（macOS 不支持 Xbox 有线连接）。若在 Godot 编辑器中运行，请关闭“嵌入游戏”后再试。", 15, Ui.MUTED)
+		mac_note.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	_vibration_toggle = Ui.menu_button(rows, "", _toggle_vibration)
+	var instructions := Ui.label(rows, "体感转向：像转方向盘一样扭动掌机。按平常姿势握住后，用 R3 / G 校准中位。", 16, Ui.MUTED)
 	instructions.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	_motion_status = Ui.label(rows, "", 18, Ui.GREEN)
+	_motion_status = Ui.label(rows, "", 17, Ui.GREEN)
 	_motion_toggle = Ui.menu_button(rows, "", _toggle_motion)
 	var recenter := Ui.menu_button(rows, "校准中位", _recenter_motion)
 	_motion_invert = Ui.menu_button(rows, "", _invert_motion)
 	var back := Ui.menu_button(rows, "返回", _close_motion_settings)
-	Ui.link_vertical_buttons([_motion_toggle, recenter, _motion_invert, back])
+	Ui.link_vertical_buttons([_vibration_toggle, _motion_toggle, recenter, _motion_invert, back])
 	_refresh_motion_settings()
-	_motion_toggle.grab_focus()
+	_vibration_toggle.grab_focus()
 
 
 func _close_motion_settings() -> void:
@@ -637,9 +704,18 @@ func _save_motion_settings() -> void:
 	_save_settings()
 
 
+func _toggle_vibration() -> void:
+	Gamepad.vibration = not Gamepad.vibration
+	_settings.set_value("controls", "vibration", Gamepad.vibration)
+	_save_settings()
+	_refresh_motion_settings()
+	Gamepad.rumble(0.4, 0.6, 0.25)
+
+
 func _refresh_motion_settings() -> void:
 	if not is_instance_valid(_motion_status):
 		return
+	_vibration_toggle.text = "手柄震动    开启" if Gamepad.vibration else "手柄震动    关闭"
 	_motion_toggle.text = "体感转向    开启" if _motion.enabled else "体感转向    关闭"
 	_motion_invert.text = "转向方向    反转" if _motion.reversed else "转向方向    正常"
 	match _motion.state:
@@ -995,23 +1071,20 @@ func _show_embedded_hint(rows: VBoxContainer) -> void:
 
 
 func _toggle_power_mode() -> void:
-	_low_power = not _low_power
+	_performance = (_performance + 1) % DeviceProfile.PRESETS.size()
 	_apply_power_mode()
-	_settings.set_value("display", "battery_saver", _low_power)
+	_settings.set_value("display", "performance", _performance)
 	_save_settings()
 	_update_power_label()
 
 
 func _apply_power_mode() -> void:
-	Engine.max_fps = 30 if _low_power else 60
-	get_viewport().scaling_3d_scale = 0.72 if _low_power else 1.0
-	get_viewport().msaa_3d = Viewport.MSAA_DISABLED if _low_power else Viewport.MSAA_2X
+	DeviceProfile.apply(_performance, get_viewport())
 
 
 func _update_power_label() -> void:
 	if is_instance_valid(_power_label):
-		var state := "省电 30 FPS" if _low_power else "流畅 60 FPS"
-		_power_label.text = "X / P  切换帧率    %s" % state
+		_power_label.text = "X / P  画面模式    %s" % DeviceProfile.label(_performance)
 
 
 func _clear_overlay() -> void:
@@ -1025,6 +1098,9 @@ func _clear_overlay() -> void:
 	_motion_status = null
 	_motion_toggle = null
 	_motion_invert = null
+	_pad_status = null
+	_pad_live = null
+	_vibration_toggle = null
 
 
 func _build_overlay() -> void:

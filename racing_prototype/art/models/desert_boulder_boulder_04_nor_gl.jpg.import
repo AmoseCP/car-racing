@@ -4,8 +4,9 @@ importer="texture"
 type="CompressedTexture2D"
 uid="uid://b6v1arrslgequ"
 path.s3tc="res://.godot/imported/desert_boulder_boulder_04_nor_gl.jpg-51b1626b7c3cd5842b2eb0bdb4b56974.s3tc.ctex"
+path.etc2="res://.godot/imported/desert_boulder_boulder_04_nor_gl.jpg-51b1626b7c3cd5842b2eb0bdb4b56974.etc2.ctex"
 metadata={
-"imported_formats": ["s3tc_bptc"],
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
 "vram_texture": true
 }
 generator_parameters={
@@ -15,7 +16,7 @@ generator_parameters={
 [deps]
 
 source_file="res://racing_prototype/art/models/desert_boulder_boulder_04_nor_gl.jpg"
-dest_files=["res://.godot/imported/desert_boulder_boulder_04_nor_gl.jpg-51b1626b7c3cd5842b2eb0bdb4b56974.s3tc.ctex"]
+dest_files=["res://.godot/imported/desert_boulder_boulder_04_nor_gl.jpg-51b1626b7c3cd5842b2eb0bdb4b56974.s3tc.ctex", "res://.godot/imported/desert_boulder_boulder_04_nor_gl.jpg-51b1626b7c3cd5842b2eb0bdb4b56974.etc2.ctex"]
 
 [params]
 

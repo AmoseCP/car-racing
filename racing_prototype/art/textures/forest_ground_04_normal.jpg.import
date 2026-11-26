@@ -4,15 +4,16 @@ importer="texture"
 type="CompressedTexture2D"
 uid="uid://fogguwt2f8mc"
 path.s3tc="res://.godot/imported/forest_ground_04_normal.jpg-c7ceb9de5994fb5df365af76be165b79.s3tc.ctex"
+path.etc2="res://.godot/imported/forest_ground_04_normal.jpg-c7ceb9de5994fb5df365af76be165b79.etc2.ctex"
 metadata={
-"imported_formats": ["s3tc_bptc"],
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
 "vram_texture": true
 }
 
 [deps]
 
 source_file="res://racing_prototype/art/textures/forest_ground_04_normal.jpg"
-dest_files=["res://.godot/imported/forest_ground_04_normal.jpg-c7ceb9de5994fb5df365af76be165b79.s3tc.ctex"]
+dest_files=["res://.godot/imported/forest_ground_04_normal.jpg-c7ceb9de5994fb5df365af76be165b79.s3tc.ctex", "res://.godot/imported/forest_ground_04_normal.jpg-c7ceb9de5994fb5df365af76be165b79.etc2.ctex"]
 
 [params]
 

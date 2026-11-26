@@ -4,8 +4,9 @@ importer="texture"
 type="CompressedTexture2D"
 uid="uid://cot8768aknvcg"
 path.s3tc="res://.godot/imported/gt_race_car_rubber_normal.jpg-1b019c02d0d1c3c4f1fdb2401d1e5174.s3tc.ctex"
+path.etc2="res://.godot/imported/gt_race_car_rubber_normal.jpg-1b019c02d0d1c3c4f1fdb2401d1e5174.etc2.ctex"
 metadata={
-"imported_formats": ["s3tc_bptc"],
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
 "vram_texture": true
 }
 generator_parameters={
@@ -15,7 +16,7 @@ generator_parameters={
 [deps]
 
 source_file="res://racing_prototype/art/models/gt_race_car_rubber_normal.jpg"
-dest_files=["res://.godot/imported/gt_race_car_rubber_normal.jpg-1b019c02d0d1c3c4f1fdb2401d1e5174.s3tc.ctex"]
+dest_files=["res://.godot/imported/gt_race_car_rubber_normal.jpg-1b019c02d0d1c3c4f1fdb2401d1e5174.s3tc.ctex", "res://.godot/imported/gt_race_car_rubber_normal.jpg-1b019c02d0d1c3c4f1fdb2401d1e5174.etc2.ctex"]
 
 [params]
 

@@ -4,8 +4,9 @@ importer="texture"
 type="CompressedTexture2D"
 uid="uid://b7tigb8gt46s6"
 path.s3tc="res://.godot/imported/roadside_pine_pine_sapling_small_bark_nor_gl.jpg-17a07c5bdfdab31aed3aa77fbe7819f7.s3tc.ctex"
+path.etc2="res://.godot/imported/roadside_pine_pine_sapling_small_bark_nor_gl.jpg-17a07c5bdfdab31aed3aa77fbe7819f7.etc2.ctex"
 metadata={
-"imported_formats": ["s3tc_bptc"],
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
 "vram_texture": true
 }
 generator_parameters={
@@ -15,7 +16,7 @@ generator_parameters={
 [deps]
 
 source_file="res://racing_prototype/art/models/roadside_pine_pine_sapling_small_bark_nor_gl.jpg"
-dest_files=["res://.godot/imported/roadside_pine_pine_sapling_small_bark_nor_gl.jpg-17a07c5bdfdab31aed3aa77fbe7819f7.s3tc.ctex"]
+dest_files=["res://.godot/imported/roadside_pine_pine_sapling_small_bark_nor_gl.jpg-17a07c5bdfdab31aed3aa77fbe7819f7.s3tc.ctex", "res://.godot/imported/roadside_pine_pine_sapling_small_bark_nor_gl.jpg-17a07c5bdfdab31aed3aa77fbe7819f7.etc2.ctex"]
 
 [params]
 

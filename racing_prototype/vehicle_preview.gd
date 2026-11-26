@@ -8,7 +8,7 @@ var _model: Node3D
 
 func _ready() -> void:
 	$Viewport/Camera3D.look_at(Vector3(0, 0.53, 0))
-	if Engine.max_fps == 30:
+	if Engine.max_fps < 60:
 		$Viewport.msaa_3d = Viewport.MSAA_DISABLED
 
 

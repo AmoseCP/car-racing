@@ -7,6 +7,7 @@ const Vehicles := preload("res://racing_prototype/vehicles.gd")
 const RaceWeather := preload("res://racing_prototype/race_weather.gd")
 const Audio := preload("res://racing_prototype/game_audio.gd")
 const DrivingAudio := preload("res://racing_prototype/car_audio.gd")
+const Gamepad := preload("res://racing_prototype/gamepad.gd")
 const REVERSE_SPEED := 10.0
 const COAST_DECELERATION := 5.0
 const GRAVITY := 27.0
@@ -59,6 +60,7 @@ var _profile: Dictionary
 var _body: MeshInstance3D
 var _wheels: Array[Node3D] = []
 var _audio: DrivingAudio
+var _rumble_clock := 0.0
 var _paints: Array[StandardMaterial3D] = []
 var _factory_colors: Array[Color] = []
 var _drift_time := 0.0
@@ -161,15 +163,40 @@ func _physics_process(delta: float) -> void:
 			closing_speed = maxf(closing_speed, -(incoming - other_velocity).dot(normal))
 		if closing_speed > 0.0:
 			impact.emit(closing_speed)
+			var hit := clampf(closing_speed / 30.0, 0.0, 1.0)
+			if closing_speed > 2.0:
+				Gamepad.rumble(0.3 + 0.7 * hit, 0.15 + 0.85 * hit, 0.12 + 0.28 * hit)
 	_update_wheels(steer, delta)
+	_update_rumble(delta)
 	if is_physics_processing() and not get_tree().paused:
 		_audio.advance(delta, throttle, steer)
+
+
+func _update_rumble(delta: float) -> void:
+	# Light continuous feedback for drifting, nitro and rough ground.
+	_rumble_clock -= delta
+	if _rumble_clock > 0.0:
+		return
+	var weak := 0.0
+	var strong := 0.0
+	if drifting:
+		weak = 0.22
+	if nitro_active:
+		weak = maxf(weak, 0.24)
+		strong = 0.12
+	if rough_surface and absf(speed) > 3.0:
+		weak = maxf(weak, 0.32)
+		strong = maxf(strong, 0.14)
+	if weak > 0.0:
+		Gamepad.rumble(weak, strong, 0.14)
+		_rumble_clock = 0.1
 
 
 func _update_nitro(wants_nitro: bool, delta: float) -> void:
 	var burning := wants_nitro and nitro > 0.0 and speed > 2.0
 	if burning and not nitro_active:
 		Audio.play_from(self, &"boost", -2.0, 1.15)
+		Gamepad.rumble(0.25, 0.55, 0.3)
 	nitro_active = burning
 	if nitro_active:
 		nitro = maxf(0.0, nitro - delta / NITRO_SECONDS)
@@ -404,6 +431,7 @@ func activate_boost() -> void:
 	boost_time = _profile.boost_seconds
 	speed = minf(speed + _profile.boost_push * factor, _profile.boost_speed * factor)
 	Audio.play_from(self, &"boost")
+	Gamepad.rumble(0.3, 0.6, 0.35)
 
 
 func respawn() -> void:

@@ -4,8 +4,9 @@ importer="texture"
 type="CompressedTexture2D"
 uid="uid://v6an5k46abfw"
 path.s3tc="res://.godot/imported/endurance_prototype_carbon_normal.jpg-9a14eb151c05e083c3765c0ad5699319.s3tc.ctex"
+path.etc2="res://.godot/imported/endurance_prototype_carbon_normal.jpg-9a14eb151c05e083c3765c0ad5699319.etc2.ctex"
 metadata={
-"imported_formats": ["s3tc_bptc"],
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
 "vram_texture": true
 }
 generator_parameters={
@@ -15,7 +16,7 @@ generator_parameters={
 [deps]
 
 source_file="res://racing_prototype/art/models/endurance_prototype_carbon_normal.jpg"
-dest_files=["res://.godot/imported/endurance_prototype_carbon_normal.jpg-9a14eb151c05e083c3765c0ad5699319.s3tc.ctex"]
+dest_files=["res://.godot/imported/endurance_prototype_carbon_normal.jpg-9a14eb151c05e083c3765c0ad5699319.s3tc.ctex", "res://.godot/imported/endurance_prototype_carbon_normal.jpg-9a14eb151c05e083c3765c0ad5699319.etc2.ctex"]
 
 [params]
 

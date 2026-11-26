@@ -4,8 +4,9 @@ importer="texture"
 type="CompressedTexture2D"
 uid="uid://d2qt7j1uw1of7"
 path.s3tc="res://.godot/imported/forest_fir_fir_sapling_twigs_rough.jpg-3d77b05f290442a51106ccf7bfb84280.s3tc.ctex"
+path.etc2="res://.godot/imported/forest_fir_fir_sapling_twigs_rough.jpg-3d77b05f290442a51106ccf7bfb84280.etc2.ctex"
 metadata={
-"imported_formats": ["s3tc_bptc"],
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
 "vram_texture": true
 }
 generator_parameters={
@@ -15,7 +16,7 @@ generator_parameters={
 [deps]
 
 source_file="res://racing_prototype/art/models/forest_fir_fir_sapling_twigs_rough.jpg"
-dest_files=["res://.godot/imported/forest_fir_fir_sapling_twigs_rough.jpg-3d77b05f290442a51106ccf7bfb84280.s3tc.ctex"]
+dest_files=["res://.godot/imported/forest_fir_fir_sapling_twigs_rough.jpg-3d77b05f290442a51106ccf7bfb84280.s3tc.ctex", "res://.godot/imported/forest_fir_fir_sapling_twigs_rough.jpg-3d77b05f290442a51106ccf7bfb84280.etc2.ctex"]
 
 [params]
 

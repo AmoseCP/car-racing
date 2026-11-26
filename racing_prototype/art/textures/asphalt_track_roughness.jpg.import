@@ -4,15 +4,16 @@ importer="texture"
 type="CompressedTexture2D"
 uid="uid://byn8hy5ya3rcc"
 path.s3tc="res://.godot/imported/asphalt_track_roughness.jpg-fa155104faaa6039799ae7d1199b4ead.s3tc.ctex"
+path.etc2="res://.godot/imported/asphalt_track_roughness.jpg-fa155104faaa6039799ae7d1199b4ead.etc2.ctex"
 metadata={
-"imported_formats": ["s3tc_bptc"],
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
 "vram_texture": true
 }
 
 [deps]
 
 source_file="res://racing_prototype/art/textures/asphalt_track_roughness.jpg"
-dest_files=["res://.godot/imported/asphalt_track_roughness.jpg-fa155104faaa6039799ae7d1199b4ead.s3tc.ctex"]
+dest_files=["res://.godot/imported/asphalt_track_roughness.jpg-fa155104faaa6039799ae7d1199b4ead.s3tc.ctex", "res://.godot/imported/asphalt_track_roughness.jpg-fa155104faaa6039799ae7d1199b4ead.etc2.ctex"]
 
 [params]
 

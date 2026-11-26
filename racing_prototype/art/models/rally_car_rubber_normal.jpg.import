@@ -4,8 +4,9 @@ importer="texture"
 type="CompressedTexture2D"
 uid="uid://cudvk5sec1w72"
 path.s3tc="res://.godot/imported/rally_car_rubber_normal.jpg-bd88c3c6a8af431b50c361d799e06d7d.s3tc.ctex"
+path.etc2="res://.godot/imported/rally_car_rubber_normal.jpg-bd88c3c6a8af431b50c361d799e06d7d.etc2.ctex"
 metadata={
-"imported_formats": ["s3tc_bptc"],
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
 "vram_texture": true
 }
 generator_parameters={
@@ -15,7 +16,7 @@ generator_parameters={
 [deps]
 
 source_file="res://racing_prototype/art/models/rally_car_rubber_normal.jpg"
-dest_files=["res://.godot/imported/rally_car_rubber_normal.jpg-bd88c3c6a8af431b50c361d799e06d7d.s3tc.ctex"]
+dest_files=["res://.godot/imported/rally_car_rubber_normal.jpg-bd88c3c6a8af431b50c361d799e06d7d.s3tc.ctex", "res://.godot/imported/rally_car_rubber_normal.jpg-bd88c3c6a8af431b50c361d799e06d7d.etc2.ctex"]
 
 [params]
 

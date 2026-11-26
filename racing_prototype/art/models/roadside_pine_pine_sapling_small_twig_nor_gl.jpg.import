@@ -4,8 +4,9 @@ importer="texture"
 type="CompressedTexture2D"
 uid="uid://5mjlqysk4ktv"
 path.s3tc="res://.godot/imported/roadside_pine_pine_sapling_small_twig_nor_gl.jpg-7b69d0715f0316cab917107cec0a27d5.s3tc.ctex"
+path.etc2="res://.godot/imported/roadside_pine_pine_sapling_small_twig_nor_gl.jpg-7b69d0715f0316cab917107cec0a27d5.etc2.ctex"
 metadata={
-"imported_formats": ["s3tc_bptc"],
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
 "vram_texture": true
 }
 generator_parameters={
@@ -15,7 +16,7 @@ generator_parameters={
 [deps]
 
 source_file="res://racing_prototype/art/models/roadside_pine_pine_sapling_small_twig_nor_gl.jpg"
-dest_files=["res://.godot/imported/roadside_pine_pine_sapling_small_twig_nor_gl.jpg-7b69d0715f0316cab917107cec0a27d5.s3tc.ctex"]
+dest_files=["res://.godot/imported/roadside_pine_pine_sapling_small_twig_nor_gl.jpg-7b69d0715f0316cab917107cec0a27d5.s3tc.ctex", "res://.godot/imported/roadside_pine_pine_sapling_small_twig_nor_gl.jpg-7b69d0715f0316cab917107cec0a27d5.etc2.ctex"]
 
 [params]
 

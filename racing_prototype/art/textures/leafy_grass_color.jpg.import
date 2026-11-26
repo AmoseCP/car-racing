@@ -4,15 +4,16 @@ importer="texture"
 type="CompressedTexture2D"
 uid="uid://b2ruplmc1qsc5"
 path.s3tc="res://.godot/imported/leafy_grass_color.jpg-4f5f303da203fff8b31e027b813c12f7.s3tc.ctex"
+path.etc2="res://.godot/imported/leafy_grass_color.jpg-4f5f303da203fff8b31e027b813c12f7.etc2.ctex"
 metadata={
-"imported_formats": ["s3tc_bptc"],
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
 "vram_texture": true
 }
 
 [deps]
 
 source_file="res://racing_prototype/art/textures/leafy_grass_color.jpg"
-dest_files=["res://.godot/imported/leafy_grass_color.jpg-4f5f303da203fff8b31e027b813c12f7.s3tc.ctex"]
+dest_files=["res://.godot/imported/leafy_grass_color.jpg-4f5f303da203fff8b31e027b813c12f7.s3tc.ctex", "res://.godot/imported/leafy_grass_color.jpg-4f5f303da203fff8b31e027b813c12f7.etc2.ctex"]
 
 [params]
 

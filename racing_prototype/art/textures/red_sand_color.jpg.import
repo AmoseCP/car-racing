@@ -4,15 +4,16 @@ importer="texture"
 type="CompressedTexture2D"
 uid="uid://yiuvr7uq2nk5"
 path.s3tc="res://.godot/imported/red_sand_color.jpg-b24a529315e51c54050227e8d15f3147.s3tc.ctex"
+path.etc2="res://.godot/imported/red_sand_color.jpg-b24a529315e51c54050227e8d15f3147.etc2.ctex"
 metadata={
-"imported_formats": ["s3tc_bptc"],
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
 "vram_texture": true
 }
 
 [deps]
 
 source_file="res://racing_prototype/art/textures/red_sand_color.jpg"
-dest_files=["res://.godot/imported/red_sand_color.jpg-b24a529315e51c54050227e8d15f3147.s3tc.ctex"]
+dest_files=["res://.godot/imported/red_sand_color.jpg-b24a529315e51c54050227e8d15f3147.s3tc.ctex", "res://.godot/imported/red_sand_color.jpg-b24a529315e51c54050227e8d15f3147.etc2.ctex"]
 
 [params]
 

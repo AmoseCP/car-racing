@@ -4,15 +4,16 @@ importer="texture"
 type="CompressedTexture2D"
 uid="uid://dsjeu0tlhqq3x"
 path.s3tc="res://.godot/imported/concrete_slab_wall_roughness.jpg-8236b706e54ffd95034902c72171ac36.s3tc.ctex"
+path.etc2="res://.godot/imported/concrete_slab_wall_roughness.jpg-8236b706e54ffd95034902c72171ac36.etc2.ctex"
 metadata={
-"imported_formats": ["s3tc_bptc"],
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
 "vram_texture": true
 }
 
 [deps]
 
 source_file="res://racing_prototype/art/textures/concrete_slab_wall_roughness.jpg"
-dest_files=["res://.godot/imported/concrete_slab_wall_roughness.jpg-8236b706e54ffd95034902c72171ac36.s3tc.ctex"]
+dest_files=["res://.godot/imported/concrete_slab_wall_roughness.jpg-8236b706e54ffd95034902c72171ac36.s3tc.ctex", "res://.godot/imported/concrete_slab_wall_roughness.jpg-8236b706e54ffd95034902c72171ac36.etc2.ctex"]
 
 [params]
 

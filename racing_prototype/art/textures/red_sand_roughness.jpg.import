@@ -4,15 +4,16 @@ importer="texture"
 type="CompressedTexture2D"
 uid="uid://db8rdoa5fkbqk"
 path.s3tc="res://.godot/imported/red_sand_roughness.jpg-4e307334f10d7bb597815ac866d7b3a2.s3tc.ctex"
+path.etc2="res://.godot/imported/red_sand_roughness.jpg-4e307334f10d7bb597815ac866d7b3a2.etc2.ctex"
 metadata={
-"imported_formats": ["s3tc_bptc"],
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
 "vram_texture": true
 }
 
 [deps]
 
 source_file="res://racing_prototype/art/textures/red_sand_roughness.jpg"
-dest_files=["res://.godot/imported/red_sand_roughness.jpg-4e307334f10d7bb597815ac866d7b3a2.s3tc.ctex"]
+dest_files=["res://.godot/imported/red_sand_roughness.jpg-4e307334f10d7bb597815ac866d7b3a2.s3tc.ctex", "res://.godot/imported/red_sand_roughness.jpg-4e307334f10d7bb597815ac866d7b3a2.etc2.ctex"]
 
 [params]
 

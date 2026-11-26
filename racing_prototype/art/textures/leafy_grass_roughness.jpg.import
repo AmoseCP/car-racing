@@ -4,15 +4,16 @@ importer="texture"
 type="CompressedTexture2D"
 uid="uid://cwpeud21qgso5"
 path.s3tc="res://.godot/imported/leafy_grass_roughness.jpg-38ad4cff4a4bbedeb6d46eec41ac4b83.s3tc.ctex"
+path.etc2="res://.godot/imported/leafy_grass_roughness.jpg-38ad4cff4a4bbedeb6d46eec41ac4b83.etc2.ctex"
 metadata={
-"imported_formats": ["s3tc_bptc"],
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
 "vram_texture": true
 }
 
 [deps]
 
 source_file="res://racing_prototype/art/textures/leafy_grass_roughness.jpg"
-dest_files=["res://.godot/imported/leafy_grass_roughness.jpg-38ad4cff4a4bbedeb6d46eec41ac4b83.s3tc.ctex"]
+dest_files=["res://.godot/imported/leafy_grass_roughness.jpg-38ad4cff4a4bbedeb6d46eec41ac4b83.s3tc.ctex", "res://.godot/imported/leafy_grass_roughness.jpg-38ad4cff4a4bbedeb6d46eec41ac4b83.etc2.ctex"]
 
 [params]
 

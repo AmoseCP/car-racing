@@ -4,15 +4,16 @@ importer="texture"
 type="CompressedTexture2D"
 uid="uid://thteiui21nma"
 path.s3tc="res://.godot/imported/concrete_slab_wall_normal.jpg-6f28821b1037245bda9232f92624fee2.s3tc.ctex"
+path.etc2="res://.godot/imported/concrete_slab_wall_normal.jpg-6f28821b1037245bda9232f92624fee2.etc2.ctex"
 metadata={
-"imported_formats": ["s3tc_bptc"],
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
 "vram_texture": true
 }
 
 [deps]
 
 source_file="res://racing_prototype/art/textures/concrete_slab_wall_normal.jpg"
-dest_files=["res://.godot/imported/concrete_slab_wall_normal.jpg-6f28821b1037245bda9232f92624fee2.s3tc.ctex"]
+dest_files=["res://.godot/imported/concrete_slab_wall_normal.jpg-6f28821b1037245bda9232f92624fee2.s3tc.ctex", "res://.godot/imported/concrete_slab_wall_normal.jpg-6f28821b1037245bda9232f92624fee2.etc2.ctex"]
 
 [params]
 
