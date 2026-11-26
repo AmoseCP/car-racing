@@ -28,8 +28,8 @@ var snow_strength := 0.0
 
 var _mode: StringName = Modes.DYNAMIC
 var _surfaces: Array[ShaderMaterial] = []
-var _rain: GPUParticles3D
-var _snow: GPUParticles3D
+var _rain: CPUParticles3D
+var _snow: CPUParticles3D
 
 @onready var _track: Node3D = $"../Track"
 @onready var _camera: Camera3D = $"../ChaseCamera"
@@ -108,12 +108,12 @@ func _update_precipitation() -> void:
 	_set_emitter(_snow, snow_strength if outdoors else 0.0)
 
 
-func _set_emitter(emitter: GPUParticles3D, strength: float) -> void:
+func _set_emitter(emitter: CPUParticles3D, strength: float) -> void:
 	var active := strength > 0.015
 	if emitter.emitting != active:
 		emitter.emitting = active
 		emitter.visible = active
-	emitter.amount_ratio = strength
+	emitter.color = Color(1.0, 1.0, 1.0, clampf(strength, 0.0, 1.0))
 
 
 func _bind_surface(surface: MeshInstance3D, snow_retention: float) -> void:
@@ -154,7 +154,7 @@ func _build_particle_texture() -> GradientTexture2D:
 	return texture
 
 
-func _make_precipitation(node_name: String, profile: Dictionary, texture: Texture2D) -> GPUParticles3D:
+func _make_precipitation(node_name: String, profile: Dictionary, texture: Texture2D) -> CPUParticles3D:
 	var particle_material := StandardMaterial3D.new()
 	particle_material.albedo_color = profile.color
 	particle_material.albedo_texture = texture
@@ -164,7 +164,7 @@ func _make_precipitation(node_name: String, profile: Dictionary, texture: Textur
 	var mesh := QuadMesh.new()
 	mesh.size = profile.size
 	mesh.material = particle_material
-	var emitter := GPUParticles3D.new()
+	var emitter := CPUParticles3D.new()
 	emitter.name = node_name
 	emitter.amount = profile.amount
 	emitter.lifetime = profile.lifetime
@@ -173,17 +173,15 @@ func _make_precipitation(node_name: String, profile: Dictionary, texture: Textur
 	emitter.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	emitter.emitting = false
 	emitter.visible = false
-	emitter.draw_pass_1 = mesh
-	# The headless display can track emission state without allocating a GPU particle shader.
-	if DisplayServer.get_name() != "headless":
-		var process := ParticleProcessMaterial.new()
-		process.emission_shape = ParticleProcessMaterial.EMISSION_SHAPE_BOX
-		process.emission_box_extents = profile.extents
-		process.direction = profile.direction
-		process.spread = profile.spread
-		process.gravity = profile.gravity
-		process.initial_velocity_min = profile.velocity.x
-		process.initial_velocity_max = profile.velocity.y
-		emitter.process_material = process
+	# These small weather emitters simulate on the CPU, keeping their material
+	# lifetime independent of GPU compute shader caches during app shutdown.
+	emitter.mesh = mesh
+	emitter.emission_shape = CPUParticles3D.EMISSION_SHAPE_BOX
+	emitter.emission_box_extents = profile.extents
+	emitter.direction = profile.direction
+	emitter.spread = profile.spread
+	emitter.gravity = profile.gravity
+	emitter.initial_velocity_min = profile.velocity.x
+	emitter.initial_velocity_max = profile.velocity.y
 	add_child(emitter)
 	return emitter

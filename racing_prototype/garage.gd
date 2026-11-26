@@ -12,6 +12,7 @@ const RaceScene := preload("res://racing_prototype/red_mesa.tscn")
 const JourneyScene := preload("res://racing_prototype/journey.tscn")
 const Journey := preload("res://racing_prototype/journey.gd")
 const MotionSteering := preload("res://racing_prototype/motion_steering.gd")
+const Units := preload("res://racing_prototype/units.gd")
 const WorldClock := preload("res://racing_prototype/world_clock.gd")
 const DrivingChallenge := preload("res://racing_prototype/driving_challenge.gd")
 const Audio := preload("res://racing_prototype/game_audio.gd")
@@ -24,6 +25,7 @@ var _settings := ConfigFile.new()
 var _world_clock := WorldClock.new()
 var _saved_clock := 0.0
 var _theme: Theme
+var _quitting := false
 var _mode := Mode.SELECT
 var _selected: StringName = &"desert"
 var _loaded: StringName
@@ -64,6 +66,8 @@ var _rivals_button: Button
 
 
 func _ready() -> void:
+	get_tree().auto_accept_quit = false
+	get_window().close_requested.connect(_quit_game)
 	_settings.load(SAVE_PATH)
 	var stored_clock: Variant = _settings.get_value("environment", "drive_seconds", 0.0)
 	if (stored_clock is float or stored_clock is int) and is_finite(float(stored_clock)):
@@ -104,6 +108,27 @@ func _process(_delta: float) -> void:
 
 func _exit_tree() -> void:
 	_save_world_progress()
+
+
+func _quit_game() -> void:
+	if _quitting:
+		return
+	_quitting = true
+	set_process_unhandled_input(false)
+	_save_world_progress()
+	get_tree().paused = false
+	if is_instance_valid(_race):
+		_race.queue_free()
+		_race = null
+	for voice in $Audio.get_children():
+		if voice is AudioStreamPlayer:
+			voice.stop()
+			voice.stream = null
+	# Let queued scene and GPU particle resources finish releasing before shutdown.
+	await get_tree().process_frame
+	await get_tree().process_frame
+	await get_tree().create_timer(0.1, true, false, true).timeout
+	get_tree().quit()
 
 
 func _save_world_progress() -> void:
@@ -206,7 +231,7 @@ func _show_home() -> void:
 		buttons.append(Ui.menu_button(rows, FULLSCREEN_LABEL, _toggle_fullscreen, 38))
 	elif DisplayServer.get_name() == "embedded":
 		buttons.append(Ui.menu_button(rows, "在独立窗口全屏", _open_fullscreen_window, 38))
-	buttons.append(Ui.menu_button(rows, "退出游戏", get_tree().quit, 38))
+	buttons.append(Ui.menu_button(rows, "退出游戏", _quit_game, 38))
 	Ui.link_vertical_buttons(buttons)
 	_power_label = Ui.label(rows, "", 17, Ui.MUTED)
 	_update_power_label()
@@ -222,7 +247,7 @@ func _show_home() -> void:
 	Ui.label(detail, "公路远行", 31, Ui.GREEN)
 	var note := Ui.label(detail, "一路向前，穿过不同地貌。车况降到零或燃油耗尽时结算。连续守规驾驶提升得分倍数，油量不足时驶入加油站慢行加油。", 18)
 	note.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	var speed_note := Ui.label(detail, "超限速 7 mph 或低于限速 6 mph 会扣分。", 16, Ui.MUTED)
+	var speed_note := Ui.label(detail, "超限速 %d mph 或低于限速 %d mph 会扣分。" % [Journey.OVER_LIMIT, Journey.UNDER_LIMIT], 16, Ui.MUTED)
 	speed_note.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	Ui.label(detail, "最高分  %d" % _journey_record(), 22)
 	var today := _daily_record()
@@ -719,8 +744,8 @@ func _show_journey_results(report: Dictionary) -> void:
 	Ui.label(rows, report.reason, 19, Color("ffab97"))
 	Ui.label(rows, "%d 分" % report.score, 41)
 	Ui.label(rows, "刷新最高分" if new_record else "最高分  %d" % best, 18, Ui.GREEN)
-	Ui.label(rows, "里程 %.2f km   地貌 %d 段   用时 %s" % [
-		report.distance * 0.001, report.sections, Courses.time_text(report.time)], 18, Ui.MUTED)
+	Ui.label(rows, "里程 %.2f mi   地貌 %d 段   用时 %s" % [
+		Units.miles(report.distance), report.sections, Courses.time_text(report.time)], 18, Ui.MUTED)
 	Ui.label(rows, "碰撞 %d 次   违规 %d 次   安全超车 %d 次" % [
 		report.collisions, report.violations, report.overtakes], 18, Ui.MUTED)
 	Ui.label(rows, "最高守规连击  ×%.2f" % report.get("best_multiplier", 1.0), 18, Ui.GREEN)
@@ -959,7 +984,7 @@ func _open_fullscreen_window() -> void:
 	_save_world_progress()
 	var process := OS.create_instance(["--path", ProjectSettings.globalize_path("res://"), "--fullscreen"])
 	if process > 0:
-		get_tree().quit()
+		_quit_game()
 	elif is_instance_valid(_power_label):
 		_power_label.text = "无法打开独立窗口"
 

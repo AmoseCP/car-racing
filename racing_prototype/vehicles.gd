@@ -1,7 +1,7 @@
 extends RefCounted
 
 const DEFAULT := &"gt"
-const ORDER := [&"gt", &"rally", &"prototype"]
+const ORDER := [&"gt", &"rally", &"prototype", &"truck"]
 
 const DATA := {
 	&"gt": {
@@ -10,7 +10,7 @@ const DATA := {
 		"scene": preload("res://racing_prototype/gt_car.tscn"),
 		"collision_size": Vector3(2.12, 1.26, 3.96), "tyre_radius": 0.322,
 		"top_speed": 48.0, "acceleration": 11.5, "braking": 32.0,
-		"steering": Vector2(1.55, 1.10), "boost_speed": 60.0, "boost_seconds": 1.25, "boost_push": 8.0,
+		"steering": Vector2(1.48, 1.056), "boost_speed": 60.0, "boost_seconds": 1.25, "boost_push": 8.0,
 		"paint_roles": {"Paint_Yellow": 0, "Paint_Red": 1},
 	},
 	&"rally": {
@@ -19,7 +19,7 @@ const DATA := {
 		"scene": preload("res://racing_prototype/rally_car.tscn"),
 		"collision_size": Vector3(1.99, 1.26, 3.70), "tyre_radius": 0.281,
 		"top_speed": 43.0, "acceleration": 14.0, "braking": 39.0,
-		"steering": Vector2(1.80, 1.44), "boost_speed": 54.0, "boost_seconds": 1.05, "boost_push": 7.0,
+		"steering": Vector2(1.72, 1.376), "boost_speed": 54.0, "boost_seconds": 1.05, "boost_push": 7.0,
 		"paint_roles": {"Paint_White": 0, "Paint_Blue": 1, "Paint_Red": 1},
 	},
 	&"prototype": {
@@ -28,8 +28,24 @@ const DATA := {
 		"scene": preload("res://racing_prototype/prototype_car.tscn"),
 		"collision_size": Vector3(2.05, 1.20, 4.36), "tyre_radius": 0.329,
 		"top_speed": 56.0, "acceleration": 10.5, "braking": 27.0,
-		"steering": Vector2(1.40, 0.92), "boost_speed": 70.0, "boost_seconds": 1.65, "boost_push": 10.0,
+		"steering": Vector2(1.336, 0.88), "boost_speed": 70.0, "boost_seconds": 1.65, "boost_push": 10.0,
 		"paint_roles": {"Paint_White": 0, "Paint_Blue": 1},
+	},
+	&"truck": {
+		"name": "大货车", "type": "重载型", "accent": Color("f6a45f"),
+		"description": "六轮厢式货车，起步和转向更平稳。车身长、刹车距离大，请提前减速并留足空间。",
+		"scene": preload("res://racing_prototype/truck_car.tscn"),
+		"collision_size": Vector3(3.14, 3.55, 8.66), "tyre_radius": 0.52,
+		"top_speed": 33.5, "acceleration": 4.2, "braking": 14.0,
+		"steering": Vector2(0.88, 0.48), "steering_response": 0.8,
+		"boost_speed": 39.0, "boost_seconds": 1.8, "boost_push": 3.0,
+		"headlight_height": 1.04,
+		"paint_roles": {"Paint_Cab": 0, "Paint_Cargo": 1},
+		"camera": {
+			"chase": Vector3(0.0, 5.4, 13.0), "far": Vector3(0.0, 5.8, 16.0),
+			"raised": Vector3(0.0, 5.8, 10.0), "look": Vector3(0.0, 2.3, -8.0),
+			"anchor": Vector3(0.0, 3.9, 0.0),
+		},
 	},
 }
 
@@ -74,7 +90,13 @@ static func paint(material: StandardMaterial3D, id: StringName, factory: Color, 
 
 
 static func paint_model(model: Node3D, id: StringName, livery: int) -> void:
-	var body := model.get_child(0).get_node("Body") as MeshInstance3D
+	for node in model.find_children("*", "MeshInstance3D", true, false):
+		_paint_mesh(node as MeshInstance3D, id, livery)
+
+
+static func _paint_mesh(body: MeshInstance3D, id: StringName, livery: int) -> void:
+	if body.mesh == null:
+		return
 	for index in range(body.mesh.get_surface_count()):
 		var original := body.mesh.surface_get_material(index) as StandardMaterial3D
 		if original != null and original.resource_name.begins_with("Paint_"):

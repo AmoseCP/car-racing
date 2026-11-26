@@ -85,8 +85,10 @@ func _ready() -> void:
 		_collider.shape = shape
 		_collider.position.y = shape.size.y * 0.5
 	_body = _vehicle_model.get_child(0).get_node("Body")
-	for wheel_name in ["Wheel_FL", "Wheel_FR", "Wheel_RL", "Wheel_RR"]:
-		_wheels.append(_body.get_node(wheel_name))
+	for wheel_name in ["Wheel_FL", "Wheel_FR", "Wheel_ML", "Wheel_MR", "Wheel_RL", "Wheel_RR"]:
+		var wheel := _body.get_node_or_null(wheel_name) as Node3D
+		if wheel:
+			_wheels.append(wheel)
 	for wheel in _wheels:
 		_wheel_rest.append(wheel.basis)
 	_tune_body_materials()
@@ -203,8 +205,15 @@ func _update_slip(yaw_step: float, handbrake: bool, drive: float, road_grip: flo
 
 
 func _tune_body_materials() -> void:
-	for index in range(_body.mesh.get_surface_count()):
-		var original := _body.mesh.surface_get_material(index) as StandardMaterial3D
+	for node in _vehicle_model.find_children("*", "MeshInstance3D", true, false):
+		_tune_mesh_materials(node as MeshInstance3D)
+
+
+func _tune_mesh_materials(part: MeshInstance3D) -> void:
+	if part.mesh == null:
+		return
+	for index in range(part.mesh.get_surface_count()):
+		var original := part.get_active_material(index) as StandardMaterial3D
 		if original == null:
 			continue
 		if original.resource_name.begins_with("Paint_"):
@@ -212,21 +221,23 @@ func _tune_body_materials() -> void:
 			paint.clearcoat_enabled = true
 			paint.clearcoat = 0.68
 			paint.clearcoat_roughness = 0.24
-			_body.set_surface_override_material(index, paint)
+			part.set_surface_override_material(index, paint)
 			_paints.append(paint)
 			_factory_colors.append(original.albedo_color)
 		elif original.resource_name == "Lamp_Red":
-			_brake_lights = original.duplicate()
+			if _brake_lights == null:
+				_brake_lights = original.duplicate()
 			_brake_lights.emission_enabled = true
 			_brake_lights.emission = Color("ff1e10")
 			_brake_lights.emission_energy_multiplier = 0.22
-			_body.set_surface_override_material(index, _brake_lights)
+			part.set_surface_override_material(index, _brake_lights)
 		elif original.resource_name == "Lamp":
-			_front_lamps = original.duplicate()
+			if _front_lamps == null:
+				_front_lamps = original.duplicate()
 			_front_lamps.emission_enabled = true
 			_front_lamps.emission = Color("e2efff")
 			_front_lamps.emission_energy_multiplier = 0.0
-			_body.set_surface_override_material(index, _front_lamps)
+			part.set_surface_override_material(index, _front_lamps)
 
 
 func _create_headlights() -> void:
@@ -234,7 +245,7 @@ func _create_headlights() -> void:
 	for side in [-1.0, 1.0]:
 		var light := SpotLight3D.new()
 		light.name = "HeadlightLeft" if side < 0.0 else "HeadlightRight"
-		light.position = Vector3(side * dimensions.x * 0.36, 0.58, -dimensions.z * 0.5 + 0.05)
+		light.position = Vector3(side * dimensions.x * 0.36, _profile.get("headlight_height", 0.58), -dimensions.z * 0.5 + 0.05)
 		light.rotation_degrees = Vector3(-8.0, -side * 5.0, 0)
 		light.light_color = Color("e5efff")
 		light.light_energy = 28.0
@@ -281,7 +292,8 @@ func _ease_steering(target: float, delta: float) -> float:
 	# A steering wheel takes time to wind on and self-centres a little faster.
 	var winding_on := is_zero_approx(steer_angle) or (
 		signf(target) == signf(steer_angle) and absf(target) > absf(steer_angle))
-	steer_angle = move_toward(steer_angle, target, (STEER_IN_RATE if winding_on else STEER_OUT_RATE) * delta)
+	var response: float = _profile.get("steering_response", 1.0)
+	steer_angle = move_toward(steer_angle, target, (STEER_IN_RATE if winding_on else STEER_OUT_RATE) * response * delta)
 	return steer_angle
 
 

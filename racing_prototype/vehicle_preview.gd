@@ -20,6 +20,12 @@ func show_vehicle(id: StringName, livery := 0) -> void:
 	_model = Vehicles.instantiate_model(id)
 	Vehicles.paint_model(_model, id, livery)
 	_turntable.add_child(_model)
+	var dimensions: Vector3 = Vehicles.DATA[id].collision_size
+	var scale_factor := maxf(1.0, dimensions.z / 4.4)
+	$Viewport/Camera3D.size = 4.05 * scale_factor
+	$Viewport/Camera3D.position = Vector3(5.6, 3.3, -5.7) * scale_factor
+	$Viewport/Camera3D.look_at(Vector3(0, dimensions.y * 0.43, 0))
+	$Viewport/Platform.scale = Vector3(scale_factor, 1.0, scale_factor)
 
 
 func _process(delta: float) -> void:

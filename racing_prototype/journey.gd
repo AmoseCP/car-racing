@@ -16,11 +16,12 @@ const Clock := preload("res://racing_prototype/world_clock.gd")
 const Audio := preload("res://racing_prototype/game_audio.gd")
 const Dashboard := preload("res://racing_prototype/dashboard.gd")
 const Units := preload("res://racing_prototype/units.gd")
+const Vehicles := preload("res://racing_prototype/vehicles.gd")
 const SpeedLines := preload("res://racing_prototype/speed_lines.gd")
 const HIT_THRESHOLD := 2.8
 ## Tolerances in mph.
-const OVER_LIMIT := 7
-const UNDER_LIMIT := 6
+const OVER_LIMIT := 11
+const UNDER_LIMIT := 10
 const SPEED_CHECK_SECONDS := 1.2
 const SPEED_REPEAT_SECONDS := 4.0
 const START_GRACE_SECONDS := 3.5
@@ -100,6 +101,7 @@ func _ready() -> void:
 	_current_biome = _track.biome(0.0)
 	_speed_limit = _track.speed_limit(0.0)
 	_camera.snap_to_car()
+	_slow_grace = _recovery_grace(_speed_limit - UNDER_LIMIT, START_GRACE_SECONDS)
 	_build_hud()
 
 
@@ -182,7 +184,7 @@ func restart() -> void:
 	_speed_limit = _track.speed_limit(0.0)
 	_speed_state = SpeedState.LEGAL
 	_speed_check_time = 0.0
-	_slow_grace = START_GRACE_SECONDS
+	_slow_grace = _recovery_grace(_speed_limit - UNDER_LIMIT, START_GRACE_SECONDS)
 	_notice_time = 0.0
 	_road_hint = ""
 	_current_biome = _track.biome(0.0)
@@ -226,6 +228,8 @@ func _update_progress(location: Vector2) -> void:
 func _check_speed_limit(location: Vector2, delta: float) -> void:
 	var limit := _track.speed_limit(location.x)
 	if limit != _speed_limit:
+		if limit > _speed_limit:
+			_slow_grace = maxf(_slow_grace, _recovery_grace(limit - UNDER_LIMIT, TRAFFIC_GRACE_SECONDS))
 		_speed_limit = limit
 		_speed_state = SpeedState.LEGAL
 		_speed_check_time = 0.0
@@ -237,7 +241,7 @@ func _check_speed_limit(location: Vector2, delta: float) -> void:
 	var near_station := _track.next_station(location.x) < 70.0 and (fuel < 0.98 or _refueling)
 	if on_road and distance >= 2.0:
 		if slowing_for_sign or near_station or _traffic.needs_to_slow(location, minimum):
-			_slow_grace = TRAFFIC_GRACE_SECONDS
+			_slow_grace = _recovery_grace(minimum, TRAFFIC_GRACE_SECONDS)
 		else:
 			_slow_grace = maxf(0.0, _slow_grace - delta)
 	var state := SpeedState.LEGAL
@@ -261,6 +265,16 @@ func _check_speed_limit(location: Vector2, delta: float) -> void:
 		var ahead := _track.speed_limit(location.x + 62.0)
 		if ahead < limit:
 			_road_hint = "前方限速 %d mph" % ahead
+
+
+func _recovery_grace(minimum_mph: float, base_seconds: float) -> float:
+	# Trucks and wet-road starts need enough time to regain the legal speed.
+	# This countdown expires normally, so unnecessary slow driving still counts.
+	var profile: Dictionary = Vehicles.DATA[_car.vehicle_id]
+	var target := minimum_mph / Units.MPH
+	var pull := Vehicles.power_curve(target / profile.top_speed)
+	var acceleration: float = profile.acceleration * _weather.acceleration_factor * pull
+	return maxf(base_seconds, maxf(0.0, target - absf(_car.speed)) / maxf(acceleration, 0.1) + 0.7)
 
 
 func _on_drift_finished(seconds: float, gained: float) -> void:
@@ -458,7 +472,7 @@ func _build_hud() -> void:
 
 func _refresh_hud() -> void:
 	_biome_label.text = Courses.DATA[_current_biome].name
-	_distance_label.text = "里程 %.2f km" % (distance * 0.001)
+	_distance_label.text = "里程 %.2f mi" % Units.miles(distance)
 	_score_label.text = "得分 %d     安全超车 %d" % [score(), overtakes]
 	var multiplier := streak_multiplier()
 	if multiplier >= 1.0 + STREAK_LEVELS * 0.25:

@@ -381,7 +381,9 @@ func _tunnel(chunk: Node3D, start: float, first: bool) -> void:
 	var boulders: Array[Transform3D] = []
 	for z in range(12, 174, 19):
 		for side: float in [-1.0, 1.0]:
-			var p := Vector3(road_x(start + z) + side * 22.0, -0.75, -z)
+			# The scaled, rotated rocks can extend 36 m from their origins.
+			# Allow for that footprint and the road curvature outside the tunnel walls.
+			var p := Vector3(road_x(start + z) + side * 56.0, -0.75, -z)
 			boulders.append(Transform3D(Basis(Vector3.UP, z * 0.3).scaled_local(Vector3(17, 11, 19)), p))
 	_add_asset_batch(chunk, Art.DESERT_BOULDER, boulders)
 
@@ -436,12 +438,21 @@ func _speed_limit_sign(chunk: Node3D, start: float, offset: float, direction: in
 	back.rotation.x = PI * 0.5
 	var caption := Label3D.new()
 	caption.text = str(limit)
-	caption.font_size = 100
+	caption.font_size = 90
 	caption.pixel_size = 0.0079
 	caption.modulate = Color("15171d")
 	caption.outline_size = 0
-	caption.position = Vector3(0, 2.77, 0.086)
+	caption.position = Vector3(0, 2.91, 0.086)
 	sign.add_child(caption)
+	var units := Label3D.new()
+	units.name = "Units"
+	units.text = "MPH"
+	units.font_size = 38
+	units.pixel_size = 0.006
+	units.outline_size = 0
+	units.modulate = Color("15171d")
+	units.position = Vector3(0, 2.36, 0.086)
+	sign.add_child(units)
 
 
 func _sign_disc(radius: float, material: Material) -> CylinderMesh:

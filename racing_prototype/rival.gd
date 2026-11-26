@@ -43,17 +43,22 @@ func configure(vehicle_id: StringName, livery: int, title: String, tint: Color, 
 	Vehicles.paint_model(model, vehicle_id, livery)
 	add_child(model)
 	var body := model.get_child(0).get_node("Body") as MeshInstance3D
-	for wheel_name in ["Wheel_FL", "Wheel_FR", "Wheel_RL", "Wheel_RR"]:
-		var wheel := body.get_node(wheel_name) as Node3D
-		_wheels.append(wheel)
-		_rest.append(wheel.basis)
-	for index in range(body.mesh.get_surface_count()):
-		var original := body.mesh.surface_get_material(index) as StandardMaterial3D
-		if original != null and original.resource_name == "Lamp_Red":
-			_brake_lights = original.duplicate()
-			_brake_lights.emission_enabled = true
-			_brake_lights.emission = Color("ff1e10")
-			body.set_surface_override_material(index, _brake_lights)
+	for wheel_name in ["Wheel_FL", "Wheel_FR", "Wheel_ML", "Wheel_MR", "Wheel_RL", "Wheel_RR"]:
+		var wheel := body.get_node_or_null(wheel_name) as Node3D
+		if wheel:
+			_wheels.append(wheel)
+			_rest.append(wheel.basis)
+	for part: MeshInstance3D in model.find_children("*", "MeshInstance3D", true, false):
+		if part.mesh == null:
+			continue
+		for index in range(part.mesh.get_surface_count()):
+			var original := part.get_active_material(index) as StandardMaterial3D
+			if original != null and original.resource_name == "Lamp_Red":
+				if _brake_lights == null:
+					_brake_lights = original.duplicate()
+					_brake_lights.emission_enabled = true
+					_brake_lights.emission = Color("ff1e10")
+				part.set_surface_override_material(index, _brake_lights)
 	var bounds := BoxShape3D.new()
 	bounds.size = profile.collision_size
 	var collider := CollisionShape3D.new()

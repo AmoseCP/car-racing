@@ -1,5 +1,6 @@
 extends Camera3D
 
+const Vehicles := preload("res://racing_prototype/vehicles.gd")
 const CHASE_OFFSET := Vector3(0.0, 3.25, 7.9)
 const RAISED_OFFSET := Vector3(0.0, 5.2, 5.2)
 const LOOK_OFFSET := Vector3(0.0, 0.95, -6.1)
@@ -21,11 +22,19 @@ var _heading := 0.0
 var _raise := 0.0
 var _distance := 0.0
 var _probe := PhysicsShapeQueryParameters3D.new()
+var _camera_profile: Dictionary = {}
+var _anchor := CAMERA_ANCHOR
+var _raised := RAISED_OFFSET
+var _look := LOOK_OFFSET
 
 @onready var _car: CharacterBody3D = $"../Car"
 
 
 func _ready() -> void:
+	_camera_profile = Vehicles.DATA[_car.vehicle_id].get("camera", {})
+	_anchor = _camera_profile.get("anchor", CAMERA_ANCHOR)
+	_raised = _camera_profile.get("raised", RAISED_OFFSET)
+	_look = _camera_profile.get("look", LOOK_OFFSET)
 	var lens := SphereShape3D.new()
 	lens.radius = 0.48
 	_probe.shape = lens
@@ -49,14 +58,14 @@ func _physics_process(delta: float) -> void:
 		_place_on_hood()
 		return
 	_heading = lerp_angle(_heading, _car.global_rotation.y, 1.0 - exp(-6.0 * delta))
-	var anchor := _car.global_position + CAMERA_ANCHOR
-	var normal_arm := (_chase_offset() - CAMERA_ANCHOR).rotated(Vector3.UP, _heading)
+	var anchor := _car.global_position + _anchor
+	var normal_arm := (_chase_offset() - _anchor).rotated(Vector3.UP, _heading)
 	var safe := _clearance(anchor, normal_arm)
 	var arm := normal_arm
 	if safe < normal_arm.length() - 1.0 or _raise > 0.0:
 		_raise = 1.0 if safe < normal_arm.length() - 1.0 else move_toward(_raise, 0.0, delta * 2.6)
-		var height := _chase_offset().lerp(RAISED_OFFSET, _raise)
-		arm = (height - CAMERA_ANCHOR).rotated(Vector3.UP, _heading)
+		var height := _chase_offset().lerp(_raised, _raise)
+		arm = (height - _anchor).rotated(Vector3.UP, _heading)
 		safe = _clearance(anchor, arm)
 	_distance = minf(safe, lerpf(_distance, safe, 1.0 - exp(-7.0 * delta)))
 	global_position = anchor + arm.normalized() * _distance
@@ -66,7 +75,7 @@ func _physics_process(delta: float) -> void:
 func snap_to_car() -> void:
 	_heading = _car.global_rotation.y
 	_raise = 0.0
-	_distance = (_chase_offset() - CAMERA_ANCHOR).length()
+	_distance = (_chase_offset() - _anchor).length()
 	if view == HOOD_VIEW:
 		_place_on_hood()
 	else:
@@ -76,12 +85,14 @@ func snap_to_car() -> void:
 
 
 func _chase_offset() -> Vector3:
-	return FAR_CHASE_OFFSET if view == 1 else CHASE_OFFSET
+	return _camera_profile.get("far", FAR_CHASE_OFFSET) if view == 1 else _camera_profile.get("chase", CHASE_OFFSET)
 
 
 func _place_on_hood() -> void:
 	var size: Vector3 = _car.get_node("CollisionShape3D").shape.size
 	var mount := Vector3(0.0, size.y * 0.86, -size.z * 0.5 + 0.35)
+	if size.y > 2.5:
+		mount = Vector3(0.0, size.y * 0.75, -size.z * 0.5 - 0.12)
 	global_transform = _car.global_transform.translated_local(mount)
 	rotate_object_local(Vector3.RIGHT, -0.035)
 
@@ -115,4 +126,4 @@ func _clearance(anchor: Vector3, arm: Vector3) -> float:
 
 
 func _aim_at_track() -> void:
-	look_at(_car.global_position + LOOK_OFFSET.rotated(Vector3.UP, _heading), Vector3.UP)
+	look_at(_car.global_position + _look.rotated(Vector3.UP, _heading), Vector3.UP)

@@ -6,7 +6,7 @@ const ROAD := preload("res://racing_prototype/audio/road.wav")
 const GRAVEL := preload("res://racing_prototype/audio/gravel.wav")
 const SKID := preload("res://racing_prototype/audio/skid.wav")
 const RAIN := preload("res://racing_prototype/audio/rain.wav")
-const ENGINE_TUNING := {&"gt": 1.0, &"rally": 1.10, &"prototype": 1.23}
+const ENGINE_TUNING := {&"gt": 1.0, &"rally": 1.10, &"prototype": 1.23, &"truck": 0.68}
 
 var _engine: AudioStreamPlayer
 var _road: AudioStreamPlayer

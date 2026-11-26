@@ -1,0 +1,941 @@
+[gd_scene format=3]
+
+[ext_resource type="PackedScene" path="res://racing_prototype/license_plate.tscn" id="1_plate"]
+
+[sub_resource type="StandardMaterial3D" id="Paint_Cab"]
+resource_name = "Paint_Cab"
+albedo_color = Color(0.13333333333333333, 0.27450980392156865, 0.37254901960784315, 1)
+metallic = 0.25
+roughness = 0.25
+
+[sub_resource type="StandardMaterial3D" id="Paint_Cargo"]
+resource_name = "Paint_Cargo"
+albedo_color = Color(0.8823529411764706, 0.8980392156862745, 0.9058823529411765, 1)
+metallic = 0.35
+roughness = 0.44
+
+[sub_resource type="StandardMaterial3D" id="Steel"]
+resource_name = "Steel"
+albedo_color = Color(0.4666666666666667, 0.5294117647058824, 0.5686274509803921, 1)
+metallic = 0.8
+roughness = 0.28
+
+[sub_resource type="StandardMaterial3D" id="Dark"]
+resource_name = "Dark"
+albedo_color = Color(0.08627450980392157, 0.12941176470588237, 0.16862745098039217, 1)
+metallic = 0.4
+roughness = 0.38
+
+[sub_resource type="StandardMaterial3D" id="Rubber"]
+resource_name = "Rubber"
+albedo_color = Color(0.11372549019607843, 0.12549019607843137, 0.1450980392156863, 1)
+metallic = 0
+roughness = 0.86
+
+[sub_resource type="StandardMaterial3D" id="Glass"]
+resource_name = "Glass"
+albedo_color = Color(0.08627450980392157, 0.21568627450980393, 0.2784313725490196, 1)
+metallic = 0.6
+roughness = 0.15
+
+[sub_resource type="StandardMaterial3D" id="Lamp"]
+resource_name = "Lamp"
+albedo_color = Color(0.8980392156862745, 0.9529411764705882, 1.0, 1)
+metallic = 0.25
+roughness = 0.18
+
+[sub_resource type="StandardMaterial3D" id="Lamp_Red"]
+resource_name = "Lamp_Red"
+albedo_color = Color(0.9294117647058824, 0.19215686274509805, 0.1411764705882353, 1)
+metallic = 0.2
+roughness = 0.22
+
+[sub_resource type="StandardMaterial3D" id="Amber"]
+resource_name = "Amber"
+albedo_color = Color(0.9764705882352941, 0.6784313725490196, 0.19607843137254902, 1)
+metallic = 0.2
+roughness = 0.28
+
+[sub_resource type="StandardMaterial3D" id="Reflector"]
+resource_name = "Reflector"
+albedo_color = Color(0.9568627450980393, 0.9294117647058824, 0.8784313725490196, 1)
+metallic = 0.1
+roughness = 0.3
+
+[sub_resource type="BoxMesh" id="Mesh_Body"]
+material = SubResource("Dark")
+size = Vector3(2.12, 0.25, 8.2)
+
+[sub_resource type="BoxMesh" id="Mesh_Cab"]
+material = SubResource("Paint_Cab")
+size = Vector3(2.38, 2.12, 2.16)
+
+[sub_resource type="BoxMesh" id="Mesh_Roof"]
+material = SubResource("Paint_Cab")
+size = Vector3(2.45, 0.15, 2.24)
+
+[sub_resource type="BoxMesh" id="Mesh_Windshield"]
+material = SubResource("Glass")
+size = Vector3(2.1, 0.92, 0.045)
+
+[sub_resource type="BoxMesh" id="Mesh_WindshieldDivider"]
+material = SubResource("Dark")
+size = Vector3(0.05, 0.93, 0.06)
+
+[sub_resource type="BoxMesh" id="Mesh_Grille"]
+material = SubResource("Dark")
+size = Vector3(1.15, 0.49, 0.06)
+
+[sub_resource type="BoxMesh" id="Mesh_GrilleSlat0"]
+material = SubResource("Steel")
+size = Vector3(1.07, 0.035, 0.025)
+
+[sub_resource type="BoxMesh" id="Mesh_GrilleSlat1"]
+material = SubResource("Steel")
+size = Vector3(1.07, 0.035, 0.025)
+
+[sub_resource type="BoxMesh" id="Mesh_GrilleSlat2"]
+material = SubResource("Steel")
+size = Vector3(1.07, 0.035, 0.025)
+
+[sub_resource type="BoxMesh" id="Mesh_GrilleSlat3"]
+material = SubResource("Steel")
+size = Vector3(1.07, 0.035, 0.025)
+
+[sub_resource type="BoxMesh" id="Mesh_FrontBumper"]
+material = SubResource("Steel")
+size = Vector3(2.51, 0.28, 0.18)
+
+[sub_resource type="BoxMesh" id="Mesh_Cargo"]
+material = SubResource("Paint_Cargo")
+size = Vector3(2.48, 2.48, 5.91)
+
+[sub_resource type="BoxMesh" id="Mesh_CargoRoof"]
+material = SubResource("Steel")
+size = Vector3(2.57, 0.13, 6.02)
+
+[sub_resource type="BoxMesh" id="Mesh_RearDoor"]
+material = SubResource("Paint_Cargo")
+size = Vector3(2.29, 2.23, 0.065)
+
+[sub_resource type="BoxMesh" id="Mesh_RearBumper"]
+material = SubResource("Steel")
+size = Vector3(2.52, 0.19, 0.21)
+
+[sub_resource type="BoxMesh" id="Mesh_DoorSlat0"]
+material = SubResource("Steel")
+size = Vector3(2.27, 0.025, 0.03)
+
+[sub_resource type="BoxMesh" id="Mesh_DoorSlat1"]
+material = SubResource("Steel")
+size = Vector3(2.27, 0.025, 0.03)
+
+[sub_resource type="BoxMesh" id="Mesh_DoorSlat2"]
+material = SubResource("Steel")
+size = Vector3(2.27, 0.025, 0.03)
+
+[sub_resource type="BoxMesh" id="Mesh_DoorSlat3"]
+material = SubResource("Steel")
+size = Vector3(2.27, 0.025, 0.03)
+
+[sub_resource type="BoxMesh" id="Mesh_DoorSlat4"]
+material = SubResource("Steel")
+size = Vector3(2.27, 0.025, 0.03)
+
+[sub_resource type="BoxMesh" id="Mesh_DoorSlat5"]
+material = SubResource("Steel")
+size = Vector3(2.27, 0.025, 0.03)
+
+[sub_resource type="BoxMesh" id="Mesh_DoorSlat6"]
+material = SubResource("Steel")
+size = Vector3(2.27, 0.025, 0.03)
+
+[sub_resource type="BoxMesh" id="Mesh_DoorSlat7"]
+material = SubResource("Steel")
+size = Vector3(2.27, 0.025, 0.03)
+
+[sub_resource type="BoxMesh" id="Mesh_DoorSlat8"]
+material = SubResource("Steel")
+size = Vector3(2.27, 0.025, 0.03)
+
+[sub_resource type="BoxMesh" id="Mesh_SideWindowL"]
+material = SubResource("Glass")
+size = Vector3(0.04, 0.89, 1.45)
+
+[sub_resource type="BoxMesh" id="Mesh_DoorHandleL"]
+material = SubResource("Steel")
+size = Vector3(0.07, 0.045, 0.27)
+
+[sub_resource type="BoxMesh" id="Mesh_MirrorArmL"]
+material = SubResource("Dark")
+size = Vector3(0.32, 0.045, 0.045)
+
+[sub_resource type="BoxMesh" id="Mesh_MirrorL"]
+material = SubResource("Dark")
+size = Vector3(0.15, 0.46, 0.18)
+
+[sub_resource type="BoxMesh" id="Mesh_MirrorGlassL"]
+material = SubResource("Glass")
+size = Vector3(0.12, 0.4, 0.025)
+
+[sub_resource type="BoxMesh" id="Mesh_StepL"]
+material = SubResource("Steel")
+size = Vector3(0.22, 0.13, 1.1)
+
+[sub_resource type="BoxMesh" id="Mesh_StepUpperL"]
+material = SubResource("Steel")
+size = Vector3(0.16, 0.1, 0.7)
+
+[sub_resource type="BoxMesh" id="Mesh_HeadlightL"]
+material = SubResource("Lamp")
+size = Vector3(0.45, 0.23, 0.06)
+
+[sub_resource type="BoxMesh" id="Mesh_TailLightL"]
+material = SubResource("Lamp_Red")
+size = Vector3(0.38, 0.15, 0.075)
+
+[sub_resource type="BoxMesh" id="Mesh_SideRailL"]
+material = SubResource("Steel")
+size = Vector3(0.13, 0.22, 3.35)
+
+[sub_resource type="BoxMesh" id="Mesh_TankL"]
+material = SubResource("Steel")
+size = Vector3(0.52, 0.53, 1.13)
+
+[sub_resource type="BoxMesh" id="Mesh_CargoRibL0"]
+material = SubResource("Steel")
+size = Vector3(0.055, 2.32, 0.055)
+
+[sub_resource type="BoxMesh" id="Mesh_CargoRibL1"]
+material = SubResource("Steel")
+size = Vector3(0.055, 2.32, 0.055)
+
+[sub_resource type="BoxMesh" id="Mesh_CargoRibL2"]
+material = SubResource("Steel")
+size = Vector3(0.055, 2.32, 0.055)
+
+[sub_resource type="BoxMesh" id="Mesh_CargoRibL3"]
+material = SubResource("Steel")
+size = Vector3(0.055, 2.32, 0.055)
+
+[sub_resource type="BoxMesh" id="Mesh_CargoRibL4"]
+material = SubResource("Steel")
+size = Vector3(0.055, 2.32, 0.055)
+
+[sub_resource type="BoxMesh" id="Mesh_CargoRibL5"]
+material = SubResource("Steel")
+size = Vector3(0.055, 2.32, 0.055)
+
+[sub_resource type="BoxMesh" id="Mesh_CargoRibL6"]
+material = SubResource("Steel")
+size = Vector3(0.055, 2.32, 0.055)
+
+[sub_resource type="BoxMesh" id="Mesh_CargoRibL7"]
+material = SubResource("Steel")
+size = Vector3(0.055, 2.32, 0.055)
+
+[sub_resource type="BoxMesh" id="Mesh_CargoRibL8"]
+material = SubResource("Steel")
+size = Vector3(0.055, 2.32, 0.055)
+
+[sub_resource type="BoxMesh" id="Mesh_CargoRibL9"]
+material = SubResource("Steel")
+size = Vector3(0.055, 2.32, 0.055)
+
+[sub_resource type="BoxMesh" id="Mesh_CargoRibL10"]
+material = SubResource("Steel")
+size = Vector3(0.055, 2.32, 0.055)
+
+[sub_resource type="BoxMesh" id="Mesh_CargoRibL11"]
+material = SubResource("Steel")
+size = Vector3(0.055, 2.32, 0.055)
+
+[sub_resource type="BoxMesh" id="Mesh_CargoTrimL"]
+material = SubResource("Steel")
+size = Vector3(0.06, 0.09, 5.94)
+
+[sub_resource type="BoxMesh" id="Mesh_CargoStripeL"]
+material = SubResource("Amber")
+size = Vector3(0.065, 0.1, 5.8)
+
+[sub_resource type="BoxMesh" id="Mesh_SideMarkerL0"]
+material = SubResource("Amber")
+size = Vector3(0.07, 0.09, 0.16)
+
+[sub_resource type="BoxMesh" id="Mesh_SideMarkerL1"]
+material = SubResource("Amber")
+size = Vector3(0.07, 0.09, 0.16)
+
+[sub_resource type="BoxMesh" id="Mesh_SideMarkerL2"]
+material = SubResource("Amber")
+size = Vector3(0.07, 0.09, 0.16)
+
+[sub_resource type="BoxMesh" id="Mesh_SideMarkerL3"]
+material = SubResource("Amber")
+size = Vector3(0.07, 0.09, 0.16)
+
+[sub_resource type="BoxMesh" id="Mesh_RearLockL"]
+material = SubResource("Steel")
+size = Vector3(0.035, 1.97, 0.045)
+
+[sub_resource type="BoxMesh" id="Mesh_RearReflectorL"]
+material = SubResource("Reflector")
+size = Vector3(0.38, 0.1, 0.04)
+
+[sub_resource type="BoxMesh" id="Mesh_MudflapL"]
+material = SubResource("Rubber")
+size = Vector3(0.65, 0.45, 0.045)
+
+[sub_resource type="BoxMesh" id="Mesh_SideWindowR"]
+material = SubResource("Glass")
+size = Vector3(0.04, 0.89, 1.45)
+
+[sub_resource type="BoxMesh" id="Mesh_DoorHandleR"]
+material = SubResource("Steel")
+size = Vector3(0.07, 0.045, 0.27)
+
+[sub_resource type="BoxMesh" id="Mesh_MirrorArmR"]
+material = SubResource("Dark")
+size = Vector3(0.32, 0.045, 0.045)
+
+[sub_resource type="BoxMesh" id="Mesh_MirrorR"]
+material = SubResource("Dark")
+size = Vector3(0.15, 0.46, 0.18)
+
+[sub_resource type="BoxMesh" id="Mesh_MirrorGlassR"]
+material = SubResource("Glass")
+size = Vector3(0.12, 0.4, 0.025)
+
+[sub_resource type="BoxMesh" id="Mesh_StepR"]
+material = SubResource("Steel")
+size = Vector3(0.22, 0.13, 1.1)
+
+[sub_resource type="BoxMesh" id="Mesh_StepUpperR"]
+material = SubResource("Steel")
+size = Vector3(0.16, 0.1, 0.7)
+
+[sub_resource type="BoxMesh" id="Mesh_HeadlightR"]
+material = SubResource("Lamp")
+size = Vector3(0.45, 0.23, 0.06)
+
+[sub_resource type="BoxMesh" id="Mesh_TailLightR"]
+material = SubResource("Lamp_Red")
+size = Vector3(0.38, 0.15, 0.075)
+
+[sub_resource type="BoxMesh" id="Mesh_SideRailR"]
+material = SubResource("Steel")
+size = Vector3(0.13, 0.22, 3.35)
+
+[sub_resource type="BoxMesh" id="Mesh_TankR"]
+material = SubResource("Steel")
+size = Vector3(0.52, 0.53, 1.13)
+
+[sub_resource type="BoxMesh" id="Mesh_CargoRibR0"]
+material = SubResource("Steel")
+size = Vector3(0.055, 2.32, 0.055)
+
+[sub_resource type="BoxMesh" id="Mesh_CargoRibR1"]
+material = SubResource("Steel")
+size = Vector3(0.055, 2.32, 0.055)
+
+[sub_resource type="BoxMesh" id="Mesh_CargoRibR2"]
+material = SubResource("Steel")
+size = Vector3(0.055, 2.32, 0.055)
+
+[sub_resource type="BoxMesh" id="Mesh_CargoRibR3"]
+material = SubResource("Steel")
+size = Vector3(0.055, 2.32, 0.055)
+
+[sub_resource type="BoxMesh" id="Mesh_CargoRibR4"]
+material = SubResource("Steel")
+size = Vector3(0.055, 2.32, 0.055)
+
+[sub_resource type="BoxMesh" id="Mesh_CargoRibR5"]
+material = SubResource("Steel")
+size = Vector3(0.055, 2.32, 0.055)
+
+[sub_resource type="BoxMesh" id="Mesh_CargoRibR6"]
+material = SubResource("Steel")
+size = Vector3(0.055, 2.32, 0.055)
+
+[sub_resource type="BoxMesh" id="Mesh_CargoRibR7"]
+material = SubResource("Steel")
+size = Vector3(0.055, 2.32, 0.055)
+
+[sub_resource type="BoxMesh" id="Mesh_CargoRibR8"]
+material = SubResource("Steel")
+size = Vector3(0.055, 2.32, 0.055)
+
+[sub_resource type="BoxMesh" id="Mesh_CargoRibR9"]
+material = SubResource("Steel")
+size = Vector3(0.055, 2.32, 0.055)
+
+[sub_resource type="BoxMesh" id="Mesh_CargoRibR10"]
+material = SubResource("Steel")
+size = Vector3(0.055, 2.32, 0.055)
+
+[sub_resource type="BoxMesh" id="Mesh_CargoRibR11"]
+material = SubResource("Steel")
+size = Vector3(0.055, 2.32, 0.055)
+
+[sub_resource type="BoxMesh" id="Mesh_CargoTrimR"]
+material = SubResource("Steel")
+size = Vector3(0.06, 0.09, 5.94)
+
+[sub_resource type="BoxMesh" id="Mesh_CargoStripeR"]
+material = SubResource("Amber")
+size = Vector3(0.065, 0.1, 5.8)
+
+[sub_resource type="BoxMesh" id="Mesh_SideMarkerR0"]
+material = SubResource("Amber")
+size = Vector3(0.07, 0.09, 0.16)
+
+[sub_resource type="BoxMesh" id="Mesh_SideMarkerR1"]
+material = SubResource("Amber")
+size = Vector3(0.07, 0.09, 0.16)
+
+[sub_resource type="BoxMesh" id="Mesh_SideMarkerR2"]
+material = SubResource("Amber")
+size = Vector3(0.07, 0.09, 0.16)
+
+[sub_resource type="BoxMesh" id="Mesh_SideMarkerR3"]
+material = SubResource("Amber")
+size = Vector3(0.07, 0.09, 0.16)
+
+[sub_resource type="BoxMesh" id="Mesh_RearLockR"]
+material = SubResource("Steel")
+size = Vector3(0.035, 1.97, 0.045)
+
+[sub_resource type="BoxMesh" id="Mesh_RearReflectorR"]
+material = SubResource("Reflector")
+size = Vector3(0.38, 0.1, 0.04)
+
+[sub_resource type="BoxMesh" id="Mesh_MudflapR"]
+material = SubResource("Rubber")
+size = Vector3(0.65, 0.45, 0.045)
+
+[sub_resource type="CylinderMesh" id="Mesh_Tire"]
+material = SubResource("Rubber")
+top_radius = 0.52
+bottom_radius = 0.52
+height = 0.32
+radial_segments = 32
+rings = 1
+
+[sub_resource type="CylinderMesh" id="Mesh_Rim"]
+material = SubResource("Steel")
+top_radius = 0.31
+bottom_radius = 0.31
+height = 0.33
+radial_segments = 24
+rings = 1
+
+[sub_resource type="CylinderMesh" id="Mesh_Hub"]
+material = SubResource("Dark")
+top_radius = 0.14
+bottom_radius = 0.14
+height = 0.36
+radial_segments = 16
+rings = 1
+
+[node name="CarModel" type="Node3D"]
+
+[node name="Truck" type="Node3D" parent="."]
+
+[node name="Body" type="MeshInstance3D" parent="Truck"]
+position = Vector3(0, 0.74, 0)
+mesh = SubResource("Mesh_Body")
+
+[node name="Cab" type="MeshInstance3D" parent="Truck"]
+position = Vector3(0, 1.92, -3.08)
+mesh = SubResource("Mesh_Cab")
+
+[node name="Roof" type="MeshInstance3D" parent="Truck"]
+position = Vector3(0, 3.04, -3.08)
+mesh = SubResource("Mesh_Roof")
+
+[node name="Windshield" type="MeshInstance3D" parent="Truck"]
+position = Vector3(0, 2.4, -4.176)
+mesh = SubResource("Mesh_Windshield")
+rotation_degrees = Vector3(-8, 0, 0)
+
+[node name="WindshieldDivider" type="MeshInstance3D" parent="Truck"]
+position = Vector3(0, 2.4, -4.21)
+mesh = SubResource("Mesh_WindshieldDivider")
+rotation_degrees = Vector3(-8, 0, 0)
+
+[node name="Grille" type="MeshInstance3D" parent="Truck"]
+position = Vector3(0, 1.37, -4.18)
+mesh = SubResource("Mesh_Grille")
+
+[node name="GrilleSlat0" type="MeshInstance3D" parent="Truck"]
+position = Vector3(0, 1.19, -4.22)
+mesh = SubResource("Mesh_GrilleSlat0")
+
+[node name="GrilleSlat1" type="MeshInstance3D" parent="Truck"]
+position = Vector3(0, 1.31, -4.22)
+mesh = SubResource("Mesh_GrilleSlat1")
+
+[node name="GrilleSlat2" type="MeshInstance3D" parent="Truck"]
+position = Vector3(0, 1.43, -4.22)
+mesh = SubResource("Mesh_GrilleSlat2")
+
+[node name="GrilleSlat3" type="MeshInstance3D" parent="Truck"]
+position = Vector3(0, 1.5499999999999998, -4.22)
+mesh = SubResource("Mesh_GrilleSlat3")
+
+[node name="FrontBumper" type="MeshInstance3D" parent="Truck"]
+position = Vector3(0, 0.72, -4.2)
+mesh = SubResource("Mesh_FrontBumper")
+
+[node name="Cargo" type="MeshInstance3D" parent="Truck"]
+position = Vector3(0, 2.19, 1.09)
+mesh = SubResource("Mesh_Cargo")
+
+[node name="CargoRoof" type="MeshInstance3D" parent="Truck"]
+position = Vector3(0, 3.48, 1.09)
+mesh = SubResource("Mesh_CargoRoof")
+
+[node name="RearDoor" type="MeshInstance3D" parent="Truck"]
+position = Vector3(0, 2.19, 4.085)
+mesh = SubResource("Mesh_RearDoor")
+
+[node name="RearBumper" type="MeshInstance3D" parent="Truck"]
+position = Vector3(0, 0.6, 4.18)
+mesh = SubResource("Mesh_RearBumper")
+
+[node name="DoorSlat0" type="MeshInstance3D" parent="Truck"]
+position = Vector3(0, 1.25, 4.125)
+mesh = SubResource("Mesh_DoorSlat0")
+
+[node name="DoorSlat1" type="MeshInstance3D" parent="Truck"]
+position = Vector3(0, 1.4849999999999999, 4.125)
+mesh = SubResource("Mesh_DoorSlat1")
+
+[node name="DoorSlat2" type="MeshInstance3D" parent="Truck"]
+position = Vector3(0, 1.72, 4.125)
+mesh = SubResource("Mesh_DoorSlat2")
+
+[node name="DoorSlat3" type="MeshInstance3D" parent="Truck"]
+position = Vector3(0, 1.955, 4.125)
+mesh = SubResource("Mesh_DoorSlat3")
+
+[node name="DoorSlat4" type="MeshInstance3D" parent="Truck"]
+position = Vector3(0, 2.19, 4.125)
+mesh = SubResource("Mesh_DoorSlat4")
+
+[node name="DoorSlat5" type="MeshInstance3D" parent="Truck"]
+position = Vector3(0, 2.425, 4.125)
+mesh = SubResource("Mesh_DoorSlat5")
+
+[node name="DoorSlat6" type="MeshInstance3D" parent="Truck"]
+position = Vector3(0, 2.66, 4.125)
+mesh = SubResource("Mesh_DoorSlat6")
+
+[node name="DoorSlat7" type="MeshInstance3D" parent="Truck"]
+position = Vector3(0, 2.895, 4.125)
+mesh = SubResource("Mesh_DoorSlat7")
+
+[node name="DoorSlat8" type="MeshInstance3D" parent="Truck"]
+position = Vector3(0, 3.13, 4.125)
+mesh = SubResource("Mesh_DoorSlat8")
+
+[node name="SideWindowL" type="MeshInstance3D" parent="Truck"]
+position = Vector3(-1.201, 2.41, -3.22)
+mesh = SubResource("Mesh_SideWindowL")
+
+[node name="DoorHandleL" type="MeshInstance3D" parent="Truck"]
+position = Vector3(-1.23, 1.82, -2.63)
+mesh = SubResource("Mesh_DoorHandleL")
+
+[node name="MirrorArmL" type="MeshInstance3D" parent="Truck"]
+position = Vector3(-1.31, 2.32, -3.9)
+mesh = SubResource("Mesh_MirrorArmL")
+
+[node name="MirrorL" type="MeshInstance3D" parent="Truck"]
+position = Vector3(-1.49, 2.4, -3.9)
+mesh = SubResource("Mesh_MirrorL")
+
+[node name="MirrorGlassL" type="MeshInstance3D" parent="Truck"]
+position = Vector3(-1.49, 2.4, -3.795)
+mesh = SubResource("Mesh_MirrorGlassL")
+
+[node name="StepL" type="MeshInstance3D" parent="Truck"]
+position = Vector3(-1.22, 0.67, -2.25)
+mesh = SubResource("Mesh_StepL")
+
+[node name="StepUpperL" type="MeshInstance3D" parent="Truck"]
+position = Vector3(-1.23, 0.95, -2.3)
+mesh = SubResource("Mesh_StepUpperL")
+
+[node name="HeadlightL" type="MeshInstance3D" parent="Truck"]
+position = Vector3(-0.86, 1.05, -4.19)
+mesh = SubResource("Mesh_HeadlightL")
+
+[node name="TailLightL" type="MeshInstance3D" parent="Truck"]
+position = Vector3(-0.91, 0.8, 4.17)
+mesh = SubResource("Mesh_TailLightL")
+
+[node name="SideRailL" type="MeshInstance3D" parent="Truck"]
+position = Vector3(-1.24, 0.86, -0.37)
+mesh = SubResource("Mesh_SideRailL")
+
+[node name="TankL" type="MeshInstance3D" parent="Truck"]
+position = Vector3(-0.94, 0.68, -0.99)
+mesh = SubResource("Mesh_TankL")
+
+[node name="CargoRibL0" type="MeshInstance3D" parent="Truck"]
+position = Vector3(-1.258, 2.19, -1.59)
+mesh = SubResource("Mesh_CargoRibL0")
+
+[node name="CargoRibL1" type="MeshInstance3D" parent="Truck"]
+position = Vector3(-1.258, 2.19, -1.1)
+mesh = SubResource("Mesh_CargoRibL1")
+
+[node name="CargoRibL2" type="MeshInstance3D" parent="Truck"]
+position = Vector3(-1.258, 2.19, -0.6100000000000001)
+mesh = SubResource("Mesh_CargoRibL2")
+
+[node name="CargoRibL3" type="MeshInstance3D" parent="Truck"]
+position = Vector3(-1.258, 2.19, -0.1200000000000001)
+mesh = SubResource("Mesh_CargoRibL3")
+
+[node name="CargoRibL4" type="MeshInstance3D" parent="Truck"]
+position = Vector3(-1.258, 2.19, 0.3699999999999999)
+mesh = SubResource("Mesh_CargoRibL4")
+
+[node name="CargoRibL5" type="MeshInstance3D" parent="Truck"]
+position = Vector3(-1.258, 2.19, 0.8600000000000001)
+mesh = SubResource("Mesh_CargoRibL5")
+
+[node name="CargoRibL6" type="MeshInstance3D" parent="Truck"]
+position = Vector3(-1.258, 2.19, 1.3499999999999999)
+mesh = SubResource("Mesh_CargoRibL6")
+
+[node name="CargoRibL7" type="MeshInstance3D" parent="Truck"]
+position = Vector3(-1.258, 2.19, 1.8399999999999996)
+mesh = SubResource("Mesh_CargoRibL7")
+
+[node name="CargoRibL8" type="MeshInstance3D" parent="Truck"]
+position = Vector3(-1.258, 2.19, 2.33)
+mesh = SubResource("Mesh_CargoRibL8")
+
+[node name="CargoRibL9" type="MeshInstance3D" parent="Truck"]
+position = Vector3(-1.258, 2.19, 2.8200000000000003)
+mesh = SubResource("Mesh_CargoRibL9")
+
+[node name="CargoRibL10" type="MeshInstance3D" parent="Truck"]
+position = Vector3(-1.258, 2.19, 3.3100000000000005)
+mesh = SubResource("Mesh_CargoRibL10")
+
+[node name="CargoRibL11" type="MeshInstance3D" parent="Truck"]
+position = Vector3(-1.258, 2.19, 3.8)
+mesh = SubResource("Mesh_CargoRibL11")
+
+[node name="CargoTrimL" type="MeshInstance3D" parent="Truck"]
+position = Vector3(-1.27, 1.01, 1.09)
+mesh = SubResource("Mesh_CargoTrimL")
+
+[node name="CargoStripeL" type="MeshInstance3D" parent="Truck"]
+position = Vector3(-1.275, 1.23, 1.09)
+mesh = SubResource("Mesh_CargoStripeL")
+
+[node name="SideMarkerL0" type="MeshInstance3D" parent="Truck"]
+position = Vector3(-1.29, 1.1, -1.5)
+mesh = SubResource("Mesh_SideMarkerL0")
+
+[node name="SideMarkerL1" type="MeshInstance3D" parent="Truck"]
+position = Vector3(-1.29, 1.1, 0)
+mesh = SubResource("Mesh_SideMarkerL1")
+
+[node name="SideMarkerL2" type="MeshInstance3D" parent="Truck"]
+position = Vector3(-1.29, 1.1, 1.5)
+mesh = SubResource("Mesh_SideMarkerL2")
+
+[node name="SideMarkerL3" type="MeshInstance3D" parent="Truck"]
+position = Vector3(-1.29, 1.1, 3.6)
+mesh = SubResource("Mesh_SideMarkerL3")
+
+[node name="RearLockL" type="MeshInstance3D" parent="Truck"]
+position = Vector3(-0.72, 2.16, 4.14)
+mesh = SubResource("Mesh_RearLockL")
+
+[node name="RearReflectorL" type="MeshInstance3D" parent="Truck"]
+position = Vector3(-0.92, 1.03, 4.15)
+mesh = SubResource("Mesh_RearReflectorL")
+
+[node name="MudflapL" type="MeshInstance3D" parent="Truck"]
+position = Vector3(-1.02, 0.31, 3.84)
+mesh = SubResource("Mesh_MudflapL")
+
+[node name="SideWindowR" type="MeshInstance3D" parent="Truck"]
+position = Vector3(1.201, 2.41, -3.22)
+mesh = SubResource("Mesh_SideWindowR")
+
+[node name="DoorHandleR" type="MeshInstance3D" parent="Truck"]
+position = Vector3(1.23, 1.82, -2.63)
+mesh = SubResource("Mesh_DoorHandleR")
+
+[node name="MirrorArmR" type="MeshInstance3D" parent="Truck"]
+position = Vector3(1.31, 2.32, -3.9)
+mesh = SubResource("Mesh_MirrorArmR")
+
+[node name="MirrorR" type="MeshInstance3D" parent="Truck"]
+position = Vector3(1.49, 2.4, -3.9)
+mesh = SubResource("Mesh_MirrorR")
+
+[node name="MirrorGlassR" type="MeshInstance3D" parent="Truck"]
+position = Vector3(1.49, 2.4, -3.795)
+mesh = SubResource("Mesh_MirrorGlassR")
+
+[node name="StepR" type="MeshInstance3D" parent="Truck"]
+position = Vector3(1.22, 0.67, -2.25)
+mesh = SubResource("Mesh_StepR")
+
+[node name="StepUpperR" type="MeshInstance3D" parent="Truck"]
+position = Vector3(1.23, 0.95, -2.3)
+mesh = SubResource("Mesh_StepUpperR")
+
+[node name="HeadlightR" type="MeshInstance3D" parent="Truck"]
+position = Vector3(0.86, 1.05, -4.19)
+mesh = SubResource("Mesh_HeadlightR")
+
+[node name="TailLightR" type="MeshInstance3D" parent="Truck"]
+position = Vector3(0.91, 0.8, 4.17)
+mesh = SubResource("Mesh_TailLightR")
+
+[node name="SideRailR" type="MeshInstance3D" parent="Truck"]
+position = Vector3(1.24, 0.86, -0.37)
+mesh = SubResource("Mesh_SideRailR")
+
+[node name="TankR" type="MeshInstance3D" parent="Truck"]
+position = Vector3(0.94, 0.68, -0.99)
+mesh = SubResource("Mesh_TankR")
+
+[node name="CargoRibR0" type="MeshInstance3D" parent="Truck"]
+position = Vector3(1.258, 2.19, -1.59)
+mesh = SubResource("Mesh_CargoRibR0")
+
+[node name="CargoRibR1" type="MeshInstance3D" parent="Truck"]
+position = Vector3(1.258, 2.19, -1.1)
+mesh = SubResource("Mesh_CargoRibR1")
+
+[node name="CargoRibR2" type="MeshInstance3D" parent="Truck"]
+position = Vector3(1.258, 2.19, -0.6100000000000001)
+mesh = SubResource("Mesh_CargoRibR2")
+
+[node name="CargoRibR3" type="MeshInstance3D" parent="Truck"]
+position = Vector3(1.258, 2.19, -0.1200000000000001)
+mesh = SubResource("Mesh_CargoRibR3")
+
+[node name="CargoRibR4" type="MeshInstance3D" parent="Truck"]
+position = Vector3(1.258, 2.19, 0.3699999999999999)
+mesh = SubResource("Mesh_CargoRibR4")
+
+[node name="CargoRibR5" type="MeshInstance3D" parent="Truck"]
+position = Vector3(1.258, 2.19, 0.8600000000000001)
+mesh = SubResource("Mesh_CargoRibR5")
+
+[node name="CargoRibR6" type="MeshInstance3D" parent="Truck"]
+position = Vector3(1.258, 2.19, 1.3499999999999999)
+mesh = SubResource("Mesh_CargoRibR6")
+
+[node name="CargoRibR7" type="MeshInstance3D" parent="Truck"]
+position = Vector3(1.258, 2.19, 1.8399999999999996)
+mesh = SubResource("Mesh_CargoRibR7")
+
+[node name="CargoRibR8" type="MeshInstance3D" parent="Truck"]
+position = Vector3(1.258, 2.19, 2.33)
+mesh = SubResource("Mesh_CargoRibR8")
+
+[node name="CargoRibR9" type="MeshInstance3D" parent="Truck"]
+position = Vector3(1.258, 2.19, 2.8200000000000003)
+mesh = SubResource("Mesh_CargoRibR9")
+
+[node name="CargoRibR10" type="MeshInstance3D" parent="Truck"]
+position = Vector3(1.258, 2.19, 3.3100000000000005)
+mesh = SubResource("Mesh_CargoRibR10")
+
+[node name="CargoRibR11" type="MeshInstance3D" parent="Truck"]
+position = Vector3(1.258, 2.19, 3.8)
+mesh = SubResource("Mesh_CargoRibR11")
+
+[node name="CargoTrimR" type="MeshInstance3D" parent="Truck"]
+position = Vector3(1.27, 1.01, 1.09)
+mesh = SubResource("Mesh_CargoTrimR")
+
+[node name="CargoStripeR" type="MeshInstance3D" parent="Truck"]
+position = Vector3(1.275, 1.23, 1.09)
+mesh = SubResource("Mesh_CargoStripeR")
+
+[node name="SideMarkerR0" type="MeshInstance3D" parent="Truck"]
+position = Vector3(1.29, 1.1, -1.5)
+mesh = SubResource("Mesh_SideMarkerR0")
+
+[node name="SideMarkerR1" type="MeshInstance3D" parent="Truck"]
+position = Vector3(1.29, 1.1, 0)
+mesh = SubResource("Mesh_SideMarkerR1")
+
+[node name="SideMarkerR2" type="MeshInstance3D" parent="Truck"]
+position = Vector3(1.29, 1.1, 1.5)
+mesh = SubResource("Mesh_SideMarkerR2")
+
+[node name="SideMarkerR3" type="MeshInstance3D" parent="Truck"]
+position = Vector3(1.29, 1.1, 3.6)
+mesh = SubResource("Mesh_SideMarkerR3")
+
+[node name="RearLockR" type="MeshInstance3D" parent="Truck"]
+position = Vector3(0.72, 2.16, 4.14)
+mesh = SubResource("Mesh_RearLockR")
+
+[node name="RearReflectorR" type="MeshInstance3D" parent="Truck"]
+position = Vector3(0.92, 1.03, 4.15)
+mesh = SubResource("Mesh_RearReflectorR")
+
+[node name="MudflapR" type="MeshInstance3D" parent="Truck"]
+position = Vector3(1.02, 0.31, 3.84)
+mesh = SubResource("Mesh_MudflapR")
+
+[node name="Wheel_FL" type="Node3D" parent="Truck/Body"]
+position = Vector3(-1.15, -0.22, -3.15)
+
+[node name="Tire" type="MeshInstance3D" parent="Truck/Body/Wheel_FL"]
+position = Vector3(0, 0, 0)
+mesh = SubResource("Mesh_Tire")
+rotation_degrees = Vector3(0, 0, 90)
+
+[node name="Rim" type="MeshInstance3D" parent="Truck/Body/Wheel_FL"]
+position = Vector3(0, 0, 0)
+mesh = SubResource("Mesh_Rim")
+rotation_degrees = Vector3(0, 0, 90)
+
+[node name="Hub" type="MeshInstance3D" parent="Truck/Body/Wheel_FL"]
+position = Vector3(0, 0, 0)
+mesh = SubResource("Mesh_Hub")
+rotation_degrees = Vector3(0, 0, 90)
+
+[node name="Wheel_FR" type="Node3D" parent="Truck/Body"]
+position = Vector3(1.15, -0.22, -3.15)
+
+[node name="Tire" type="MeshInstance3D" parent="Truck/Body/Wheel_FR"]
+position = Vector3(0, 0, 0)
+mesh = SubResource("Mesh_Tire")
+rotation_degrees = Vector3(0, 0, 90)
+
+[node name="Rim" type="MeshInstance3D" parent="Truck/Body/Wheel_FR"]
+position = Vector3(0, 0, 0)
+mesh = SubResource("Mesh_Rim")
+rotation_degrees = Vector3(0, 0, 90)
+
+[node name="Hub" type="MeshInstance3D" parent="Truck/Body/Wheel_FR"]
+position = Vector3(0, 0, 0)
+mesh = SubResource("Mesh_Hub")
+rotation_degrees = Vector3(0, 0, 90)
+
+[node name="Wheel_ML" type="Node3D" parent="Truck/Body"]
+position = Vector3(-1.15, -0.22, 2.03)
+
+[node name="Tire" type="MeshInstance3D" parent="Truck/Body/Wheel_ML"]
+position = Vector3(0, 0, 0)
+mesh = SubResource("Mesh_Tire")
+rotation_degrees = Vector3(0, 0, 90)
+
+[node name="Rim" type="MeshInstance3D" parent="Truck/Body/Wheel_ML"]
+position = Vector3(0, 0, 0)
+mesh = SubResource("Mesh_Rim")
+rotation_degrees = Vector3(0, 0, 90)
+
+[node name="Hub" type="MeshInstance3D" parent="Truck/Body/Wheel_ML"]
+position = Vector3(0, 0, 0)
+mesh = SubResource("Mesh_Hub")
+rotation_degrees = Vector3(0, 0, 90)
+
+[node name="InnerTire" type="MeshInstance3D" parent="Truck/Body/Wheel_ML"]
+position = Vector3(0.34, 0, 0)
+mesh = SubResource("Mesh_Tire")
+rotation_degrees = Vector3(0, 0, 90)
+
+[node name="Wheel_MR" type="Node3D" parent="Truck/Body"]
+position = Vector3(1.15, -0.22, 2.03)
+
+[node name="Tire" type="MeshInstance3D" parent="Truck/Body/Wheel_MR"]
+position = Vector3(0, 0, 0)
+mesh = SubResource("Mesh_Tire")
+rotation_degrees = Vector3(0, 0, 90)
+
+[node name="Rim" type="MeshInstance3D" parent="Truck/Body/Wheel_MR"]
+position = Vector3(0, 0, 0)
+mesh = SubResource("Mesh_Rim")
+rotation_degrees = Vector3(0, 0, 90)
+
+[node name="Hub" type="MeshInstance3D" parent="Truck/Body/Wheel_MR"]
+position = Vector3(0, 0, 0)
+mesh = SubResource("Mesh_Hub")
+rotation_degrees = Vector3(0, 0, 90)
+
+[node name="InnerTire" type="MeshInstance3D" parent="Truck/Body/Wheel_MR"]
+position = Vector3(-0.34, 0, 0)
+mesh = SubResource("Mesh_Tire")
+rotation_degrees = Vector3(0, 0, 90)
+
+[node name="Wheel_RL" type="Node3D" parent="Truck/Body"]
+position = Vector3(-1.15, -0.22, 3.3)
+
+[node name="Tire" type="MeshInstance3D" parent="Truck/Body/Wheel_RL"]
+position = Vector3(0, 0, 0)
+mesh = SubResource("Mesh_Tire")
+rotation_degrees = Vector3(0, 0, 90)
+
+[node name="Rim" type="MeshInstance3D" parent="Truck/Body/Wheel_RL"]
+position = Vector3(0, 0, 0)
+mesh = SubResource("Mesh_Rim")
+rotation_degrees = Vector3(0, 0, 90)
+
+[node name="Hub" type="MeshInstance3D" parent="Truck/Body/Wheel_RL"]
+position = Vector3(0, 0, 0)
+mesh = SubResource("Mesh_Hub")
+rotation_degrees = Vector3(0, 0, 90)
+
+[node name="InnerTire" type="MeshInstance3D" parent="Truck/Body/Wheel_RL"]
+position = Vector3(0.34, 0, 0)
+mesh = SubResource("Mesh_Tire")
+rotation_degrees = Vector3(0, 0, 90)
+
+[node name="Wheel_RR" type="Node3D" parent="Truck/Body"]
+position = Vector3(1.15, -0.22, 3.3)
+
+[node name="Tire" type="MeshInstance3D" parent="Truck/Body/Wheel_RR"]
+position = Vector3(0, 0, 0)
+mesh = SubResource("Mesh_Tire")
+rotation_degrees = Vector3(0, 0, 90)
+
+[node name="Rim" type="MeshInstance3D" parent="Truck/Body/Wheel_RR"]
+position = Vector3(0, 0, 0)
+mesh = SubResource("Mesh_Rim")
+rotation_degrees = Vector3(0, 0, 90)
+
+[node name="Hub" type="MeshInstance3D" parent="Truck/Body/Wheel_RR"]
+position = Vector3(0, 0, 0)
+mesh = SubResource("Mesh_Hub")
+rotation_degrees = Vector3(0, 0, 90)
+
+[node name="InnerTire" type="MeshInstance3D" parent="Truck/Body/Wheel_RR"]
+position = Vector3(-0.34, 0, 0)
+mesh = SubResource("Mesh_Tire")
+rotation_degrees = Vector3(0, 0, 90)
+
+[node name="RearPlate" parent="." instance=ExtResource("1_plate")]
+position = Vector3(0, 0.61, 4.3)
+
+[node name="FrontPlate" parent="." instance=ExtResource("1_plate")]
+position = Vector3(0, 0.72, -4.3)
+rotation_degrees = Vector3(0, 180, 0)
+
+[node name="FreightLabel" type="Label3D" parent="Truck"]
+position = Vector3(0, 3.05, 4.14)
+text = "CAR RACING  /  FREIGHT"
+font_size = 52
+pixel_size = 0.0028
+outline_size = 0
+modulate = Color(0.08, 0.15, 0.20, 1)
+double_sided = false
