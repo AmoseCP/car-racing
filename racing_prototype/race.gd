@@ -16,6 +16,7 @@ const Dashboard := preload("res://racing_prototype/dashboard.gd")
 const SpeedLines := preload("res://racing_prototype/speed_lines.gd")
 const DrivingChallenge := preload("res://racing_prototype/driving_challenge.gd")
 const Rivals := preload("res://racing_prototype/rivals.gd")
+const Units := preload("res://racing_prototype/units.gd")
 const COUNTDOWN_SECONDS := 3.0
 const Ui := preload("res://racing_prototype/ui_skin.gd")
 const Art := preload("res://racing_prototype/track_art.gd")
@@ -609,8 +610,8 @@ func _build_hud() -> void:
 
 
 func _update_weather_label() -> void:
-	_weather_label.text = "%s  ·  %s  ·  极速 %d km/h" % [
-		WorldClock.NAMES[_season], WeatherModes.NAMES[_weather.stage], roundi(_car.current_top_speed() * 3.6)]
+	_weather_label.text = "%s  ·  %s  ·  极速 %d mph" % [
+		WorldClock.NAMES[_season], WeatherModes.NAMES[_weather.stage], Units.mph(_car.current_top_speed())]
 
 
 func _update_lighting_label() -> void:

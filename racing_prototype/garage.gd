@@ -222,7 +222,7 @@ func _show_home() -> void:
 	Ui.label(detail, "公路远行", 31, Ui.GREEN)
 	var note := Ui.label(detail, "一路向前，穿过不同地貌。车况降到零或燃油耗尽时结算。连续守规驾驶提升得分倍数，油量不足时驶入加油站慢行加油。", 18)
 	note.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	var speed_note := Ui.label(detail, "超限速 11 km/h 或低于限速 10 km/h 会扣分。", 16, Ui.MUTED)
+	var speed_note := Ui.label(detail, "超限速 7 mph 或低于限速 6 mph 会扣分。", 16, Ui.MUTED)
 	speed_note.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	Ui.label(detail, "最高分  %d" % _journey_record(), 22)
 	var today := _daily_record()

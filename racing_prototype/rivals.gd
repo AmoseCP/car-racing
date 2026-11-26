@@ -135,7 +135,8 @@ func _drive(rival: Rival, delta: float, weather_factor: float, player: Vector2) 
 	for lane in [rival.lateral, rival.target_lateral]:
 		var blocker := _nearest_ahead(rival, lane, player)
 		target = minf(target, sqrt(blocker.y * blocker.y + 2.0 * BRAKING * maxf(blocker.x - 1.5, 0.0)))
-	var rate := BRAKING if target < old_speed else _acceleration * (1.45 if rival.boost_time > 0.0 else 1.0)
+	var pull := Vehicles.power_curve(old_speed / _top_speed)
+	var rate := BRAKING if target < old_speed else _acceleration * pull * (1.45 if rival.boost_time > 0.0 else 1.0)
 	rival.speed = move_toward(old_speed, target, rate * delta)
 	var movement := minf(rival.speed * delta, maxf(rule_gap, 0.0))
 	var previous_lateral := rival.lateral

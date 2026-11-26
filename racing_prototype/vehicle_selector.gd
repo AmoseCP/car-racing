@@ -5,6 +5,7 @@ signal cancelled
 
 const Vehicles := preload("res://racing_prototype/vehicles.gd")
 const Ui := preload("res://racing_prototype/ui_skin.gd")
+const Units := preload("res://racing_prototype/units.gd")
 const Preview := preload("res://racing_prototype/vehicle_preview.tscn")
 
 var _preview: SubViewportContainer
@@ -60,7 +61,7 @@ func setup(selected: StringName, from_pause: bool, livery := 0) -> void:
 	metrics.add_theme_constant_override("v_separation", 8)
 	details.add_child(metrics)
 	_speed = _add_stat(metrics, "极速", 60.0)
-	_acceleration = _add_stat(metrics, "0–100 km/h", 25.0)
+	_acceleration = _add_stat(metrics, "0–60 mph", 16.0)
 	_add_stat(metrics, "高速转向", 2.0)
 	_add_stat(metrics, "制动", 42.0)
 	_boost = Ui.label(details, "", 16, Ui.MUTED)
@@ -73,9 +74,9 @@ func _show_vehicle(id: StringName) -> void:
 	_role.text = "%s · %s" % [profile.name, profile.type]
 	_role.add_theme_color_override("font_color", profile.accent)
 	_description.text = profile.description
-	_speed.text = "晴天极速   %d km/h" % roundi(profile.top_speed * 3.6)
-	_acceleration.text = "0–100 km/h   %.2f s" % (100.0 / 3.6 / profile.acceleration)
-	_boost.text = "加速带   %.2f s · %d km/h" % [profile.boost_seconds, roundi(profile.boost_speed * 3.6)]
+	_speed.text = "晴天极速   %d mph" % Units.mph(profile.top_speed)
+	_acceleration.text = "0–60 mph   %.2f s" % Vehicles.time_to(id, 60.0 / Units.MPH)
+	_boost.text = "加速带   %.2f s · %d mph" % [profile.boost_seconds, Units.mph(profile.boost_speed)]
 	var values := [profile.top_speed, profile.acceleration, profile.steering.y, profile.braking]
 	var fill := Ui.panel(profile.accent, Color.TRANSPARENT, 0, 0)
 	for i in range(_stat_bars.size()):

@@ -15,10 +15,12 @@ const LightingModes := preload("res://racing_prototype/lighting_modes.gd")
 const Clock := preload("res://racing_prototype/world_clock.gd")
 const Audio := preload("res://racing_prototype/game_audio.gd")
 const Dashboard := preload("res://racing_prototype/dashboard.gd")
+const Units := preload("res://racing_prototype/units.gd")
 const SpeedLines := preload("res://racing_prototype/speed_lines.gd")
 const HIT_THRESHOLD := 2.8
-const OVER_LIMIT := 11
-const UNDER_LIMIT := 10
+## Tolerances in mph.
+const OVER_LIMIT := 7
+const UNDER_LIMIT := 6
 const SPEED_CHECK_SECONDS := 1.2
 const SPEED_REPEAT_SECONDS := 4.0
 const START_GRACE_SECONDS := 3.5
@@ -26,7 +28,7 @@ const TRAFFIC_GRACE_SECONDS := 2.5
 ## Metres per tank at gentle throttle; full throttle and nitro burn faster.
 const FUEL_RANGE := 3000.0
 const REFUEL_PER_SECOND := 0.34
-const REFUEL_SPEED_KMH := 30.0
+const REFUEL_SPEED_MPH := 20.0
 const STREAK_STEP := 400.0
 const STREAK_LEVELS := 8
 
@@ -229,9 +231,9 @@ func _check_speed_limit(location: Vector2, delta: float) -> void:
 		_speed_check_time = 0.0
 	var minimum := limit - UNDER_LIMIT
 	var on_road := absf(location.y) <= Track.HALF_ROAD
-	var speed_kmh := absf(_car.speed) * 3.6
+	var speed_mph := absf(_car.speed) * Units.MPH
 	var next_limit := _track.speed_limit(location.x + 30.0)
-	var slowing_for_sign := next_limit < limit and speed_kmh >= next_limit - UNDER_LIMIT
+	var slowing_for_sign := next_limit < limit and speed_mph >= next_limit - UNDER_LIMIT
 	var near_station := _track.next_station(location.x) < 70.0 and (fuel < 0.98 or _refueling)
 	if on_road and distance >= 2.0:
 		if slowing_for_sign or near_station or _traffic.needs_to_slow(location, minimum):
@@ -240,10 +242,10 @@ func _check_speed_limit(location: Vector2, delta: float) -> void:
 			_slow_grace = maxf(0.0, _slow_grace - delta)
 	var state := SpeedState.LEGAL
 	if on_road:
-		if speed_kmh >= limit + OVER_LIMIT:
+		if speed_mph >= limit + OVER_LIMIT:
 			state = SpeedState.FAST
-		elif speed_kmh <= minimum and distance >= 2.0 and _slow_grace <= 0.0 and _car.speed >= 0.0 and (
-				_car.current_top_speed() * 3.6 > minimum):
+		elif speed_mph <= minimum and distance >= 2.0 and _slow_grace <= 0.0 and _car.speed >= 0.0 and (
+				_car.current_top_speed() * Units.MPH > minimum):
 			state = SpeedState.SLOW
 	if state != _speed_state:
 		_speed_state = state
@@ -251,14 +253,14 @@ func _check_speed_limit(location: Vector2, delta: float) -> void:
 	if state != SpeedState.LEGAL:
 		_speed_check_time -= delta
 		if _speed_check_time <= 0.00001:
-			var difference := roundi(absf(speed_kmh - limit))
+			var difference := roundi(absf(speed_mph - limit))
 			var label := "超速" if state == SpeedState.FAST else "低于限速"
-			_on_violation("%s %d km/h" % [label, difference])
+			_on_violation("%s %d mph" % [label, difference])
 			_speed_check_time = SPEED_REPEAT_SECONDS
 	if _road_hint.is_empty():
 		var ahead := _track.speed_limit(location.x + 62.0)
 		if ahead < limit:
-			_road_hint = "前方限速 %d km/h" % ahead
+			_road_hint = "前方限速 %d mph" % ahead
 
 
 func _on_drift_finished(seconds: float, gained: float) -> void:
@@ -290,7 +292,7 @@ func _update_fuel(location: Vector2, delta: float) -> void:
 	if _car.nitro_active:
 		burn *= 2.2
 	fuel = maxf(0.0, fuel - burn)
-	var refueling := _track.in_station(location) and absf(_car.speed) * 3.6 < REFUEL_SPEED_KMH and fuel < 1.0
+	var refueling := _track.in_station(location) and absf(_car.speed) * Units.MPH < REFUEL_SPEED_MPH and fuel < 1.0
 	if refueling:
 		fuel = minf(1.0, fuel + REFUEL_PER_SECOND * delta)
 		if fuel >= 1.0:
@@ -302,7 +304,7 @@ func _update_fuel(location: Vector2, delta: float) -> void:
 	if _refueling:
 		_road_hint = "加油中  %d%%" % floori(fuel * 100.0)
 	elif _track.in_station(location) and fuel < 0.98:
-		_road_hint = "减速到 %d km/h 以下加油" % roundi(REFUEL_SPEED_KMH)
+		_road_hint = "减速到 %d mph 以下加油" % roundi(REFUEL_SPEED_MPH)
 	elif fuel < 0.55:
 		var ahead := _track.next_station(location.x)
 		if ahead < 320.0:

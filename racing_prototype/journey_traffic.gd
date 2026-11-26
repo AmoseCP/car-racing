@@ -6,6 +6,7 @@ signal overtake()
 const Track := preload("res://racing_prototype/journey_track.gd")
 const Road := preload("res://racing_prototype/road_control.gd")
 const Vehicle := preload("res://racing_prototype/traffic_vehicle.gd")
+const Units := preload("res://racing_prototype/units.gd")
 const CARS_PER_LANE := 3
 const BRAKING := 7.0
 
@@ -109,10 +110,10 @@ func _plan(index: int, player: Vector2, delta: float, weather_factor: float) -> 
 
 
 func _free_speed(vehicle: Vehicle, weather_factor: float) -> float:
-	return vehicle.cruise_speed * float(_track.speed_limit(vehicle.progress)) / 90.0 * weather_factor
+	return vehicle.cruise_speed * float(_track.speed_limit(vehicle.progress)) / 55.0 * weather_factor
 
 
-func needs_to_slow(player: Vector2, minimum_kmh: int) -> bool:
+func needs_to_slow(player: Vector2, minimum_mph: int) -> bool:
 	var front: Vector2 = _track.road_location(_car.front_position())
 	for site in _track.sites:
 		var distance := site.distance - Road.STOP_OFFSET - front.x
@@ -122,11 +123,11 @@ func needs_to_slow(player: Vector2, minimum_kmh: int) -> bool:
 			return true
 		if site.kind == Road.Kind.SIGNAL and (site.phase != Road.Phase.GREEN or site.crossing_reserved):
 			return true
-	var lookahead := maxf(25.0, minimum_kmh / 3.6 * 1.6)
+	var lookahead := maxf(25.0, minimum_mph / Units.MPH * 1.6)
 	for vehicle in vehicles:
 		var distance := vehicle.progress - player.x
 		if vehicle.direction > 0 and distance > 0.0 and distance < lookahead and (
-				absf(player.y - _track.lane_offset(vehicle.lane)) < 1.9 and vehicle.speed * 3.6 <= minimum_kmh):
+				absf(player.y - _track.lane_offset(vehicle.lane)) < 1.9 and vehicle.speed * Units.MPH <= minimum_mph):
 			return true
 	return false
 

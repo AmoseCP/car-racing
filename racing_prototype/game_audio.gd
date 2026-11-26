@@ -14,6 +14,7 @@ const CUES := {
 	&"region": [preload("res://racing_prototype/audio/region.wav"), -13.0],
 	&"split": [preload("res://racing_prototype/audio/split.wav"), -14.0],
 	&"boost": [preload("res://racing_prototype/audio/boost.wav"), -12.0],
+	&"indicator": [preload("res://racing_prototype/audio/indicator.wav"), -17.0],
 	&"finish": [preload("res://racing_prototype/audio/finish.wav"), -8.0],
 	&"game_over": [preload("res://racing_prototype/audio/game_over.wav"), -9.0],
 }

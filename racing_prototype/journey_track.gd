@@ -14,7 +14,8 @@ const ROUTE := [
 	&"city", &"city", &"city", &"tunnel", &"tunnel", &"desert", &"desert", &"desert",
 ]
 const SECTION := [0, 0, 1, 1, 1, 2, 2, 2, 3, 3, 4, 4, 4]
-const SPEED_LIMITS := {&"grassland": 90, &"forest": 70, &"city": 50, &"tunnel": 70, &"desert": 100}
+## Posted limits in mph.
+const SPEED_LIMITS := {&"grassland": 55, &"forest": 45, &"city": 30, &"tunnel": 45, &"desert": 65}
 ## Drive-through fuel lanes: in the right lane of every fourth chunk (none inside tunnels).
 const STATION_EVERY := 4
 const STATION_FROM := 60.0

@@ -4,6 +4,7 @@ extends Control
 
 const Ui := preload("res://racing_prototype/ui_skin.gd")
 const Vehicles := preload("res://racing_prototype/vehicles.gd")
+const Units := preload("res://racing_prototype/units.gd")
 const SIZE := Vector2(400, 146)
 const RADIUS := 60.0
 const TACH_CENTER := Vector2(84, 76)
@@ -25,7 +26,7 @@ const HEADLIGHT := Color("8fc8ff")
 const NITRO := Color("5fb8ff")
 const FUEL := Color("ffc861")
 
-## Posted limit in km/h; 0 hides the sign and the dial marker.
+## Posted limit in mph; 0 hides the sign and the dial marker.
 var speed_limit := 0
 ## Colours the speed readout as a warning (e.g. outside the legal band).
 var speed_warning := false
@@ -47,7 +48,7 @@ func configure(car: CharacterBody3D, accent: Color) -> void:
 	_car = car
 	_accent = accent
 	var profile: Dictionary = Vehicles.DATA[car.vehicle_id]
-	_dial_max = ceilf(profile.boost_speed * 3.6 / 40.0) * 40.0
+	_dial_max = ceilf(profile.boost_speed * Units.MPH / 20.0) * 20.0
 	_boost_seconds = profile.boost_seconds
 	custom_minimum_size = SIZE
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -65,7 +66,7 @@ func _process(delta: float) -> void:
 	if _car == null or not is_visible_in_tree():
 		return
 	_time += delta
-	_speed_shown = lerpf(_speed_shown, absf(_car.speed) * 3.6, 1.0 - exp(-14.0 * delta))
+	_speed_shown = lerpf(_speed_shown, absf(_car.speed) * Units.MPH, 1.0 - exp(-14.0 * delta))
 	var rpm: float = IDLE_RPM + (_car.engine_rev() - IDLE_REV) / (TOP_REV - IDLE_REV) * (TOP_RPM - IDLE_RPM)
 	if absf(_car.speed) < 0.3:
 		rpm += sin(_time * 21.0) * 30.0
@@ -106,12 +107,12 @@ func _draw_speedometer() -> void:
 	var fraction := _speed_shown / _dial_max
 	var color := WARNING if speed_warning else _accent
 	_draw_face(center)
-	var steps := roundi(_dial_max / 10.0)
+	var steps := roundi(_dial_max / 5.0)
 	for step in range(steps + 1):
 		var major := step % 2 == 0
 		_draw_tick(center, float(step) / steps, 10.0 if major else 5.0, Ui.MUTED, 2.0 if major else 1.0)
 		if step % 4 == 0:
-			_draw_centered(_polar(center, RADIUS - 20.0, _angle(float(step) / steps)), str(step * 10), 11, Ui.MUTED)
+			_draw_centered(_polar(center, RADIUS - 20.0, _angle(float(step) / steps)), str(step * 5), 11, Ui.MUTED)
 	if speed_limit > 0:
 		var mark := _angle(speed_limit / _dial_max)
 		var direction := Vector2.from_angle(mark)
@@ -122,10 +123,12 @@ func _draw_speedometer() -> void:
 	_draw_value_arc(center, fraction, color)
 	_draw_pointer(center, fraction, color if speed_warning else Ui.TEXT)
 	_draw_centered(center + Vector2(0, 2), "%03d" % roundi(_speed_shown), 28, color)
-	_draw_centered(center + Vector2(0, 50), "KM/H", 10, Ui.MUTED)
+	_draw_centered(center + Vector2(0, 50), "MPH", 10, Ui.MUTED)
 
 
 func _draw_column() -> void:
+	for side in [-1, 1]:
+		_draw_turn_arrow(Vector2(COLUMN_X + side * 42.0, 20.0), side, _car.indicator == side and _car.indicator_lit)
 	var y := 40.0
 	if speed_limit > 0:
 		var sign_center := Vector2(COLUMN_X, 30)
@@ -149,6 +152,16 @@ func _draw_column() -> void:
 		y += 15.0
 	_draw_bar(y, "油门", Ui.GREEN, maxf(0.0, _car.throttle), Ui.MUTED, 6.0)
 	_draw_bar(y + 12.0, "刹车", WARNING, maxf(0.0, -_car.throttle), Ui.MUTED, 6.0)
+
+
+func _draw_turn_arrow(center: Vector2, side: int, lit: bool) -> void:
+	var tip := center + Vector2(side * 9.0, 0.0)
+	var arrow := PackedVector2Array([
+		tip, center + Vector2(-side * 1.0, -8.0), center + Vector2(-side * 1.0, -3.5),
+		center + Vector2(-side * 9.0, -3.5), center + Vector2(-side * 9.0, 3.5),
+		center + Vector2(-side * 1.0, 3.5), center + Vector2(-side * 1.0, 8.0),
+	])
+	draw_colored_polygon(arrow, Color("4dff8f") if lit else LAMP_OFF)
 
 
 func _draw_face(center: Vector2) -> void:

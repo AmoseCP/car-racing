@@ -15,6 +15,13 @@ const DRIFT_SLIP := 0.2
 const MAX_SLIP := 0.72
 const NITRO_SECONDS := 2.6
 const NITRO_GAIN := 0.36
+## Steering wheel speed (full lock per second): winds on gently, self-centres faster.
+const STEER_IN_RATE := 2.4
+const STEER_OUT_RATE := 4.0
+const BLINK_PERIOD := 0.72
+const INDICATOR_THRESHOLD := 0.3
+const INDICATOR_HOLD := 0.7
+const INDICATOR_AMBER := Color("ff9a1f")
 
 @export var vehicle_id: StringName = Vehicles.DEFAULT
 @export var livery := 0
@@ -32,6 +39,11 @@ var nitro_active := false
 ## Angle between the direction of travel and the car's heading (radians).
 var slip := 0.0
 var drifting := false
+## Eased steering input, -1 (right lock) to 1 (left lock).
+var steer_angle := 0.0
+## Active turn signal: -1 left, 1 right, 0 off; lit is the current blink phase.
+var indicator := 0
+var indicator_lit := false
 var boost_time := 0.0
 var headlights_on := false
 var motion_steering: Node
@@ -50,6 +62,9 @@ var _audio: DrivingAudio
 var _paints: Array[StandardMaterial3D] = []
 var _factory_colors: Array[Color] = []
 var _drift_time := 0.0
+var _indicator_clock := 0.0
+var _indicator_hold := 0.0
+var _indicator_lamps := {-1: [], 1: []}
 var _drift_gain := 0.0
 
 @onready var _vehicle_model: Node3D = $CarModel
@@ -77,6 +92,7 @@ func _ready() -> void:
 	_tune_body_materials()
 	apply_livery(livery)
 	_create_headlights()
+	_create_indicators()
 	_audio = DrivingAudio.new()
 	_audio.name = "DrivingAudio"
 	add_child(_audio)
@@ -96,6 +112,8 @@ func _physics_process(delta: float) -> void:
 		steer = 0.0
 		handbrake = false
 		wants_nitro = false
+	steer = _ease_steering(steer, delta)
+	_update_indicators(delta)
 	boost_time = move_toward(boost_time, 0.0, delta)
 	_update_nitro(wants_nitro and drive >= 0.0, delta)
 	if nitro_active:
@@ -236,6 +254,68 @@ func apply_livery(index: int) -> void:
 		Vehicles.paint(_paints[i], vehicle_id, _factory_colors[i], livery)
 
 
+func _create_indicators() -> void:
+	var dimensions: Vector3 = _profile.collision_size
+	var amber := StandardMaterial3D.new()
+	amber.albedo_color = INDICATOR_AMBER
+	amber.emission_enabled = true
+	amber.emission = INDICATOR_AMBER
+	amber.emission_energy_multiplier = 4.0
+	var lens := BoxMesh.new()
+	lens.size = Vector3(0.2, 0.09, 0.07)
+	lens.material = amber
+	for side in [-1, 1]:
+		for corner in [Vector3(side * dimensions.x * 0.43, 0.6, -dimensions.z * 0.5 + 0.04),
+				Vector3(side * dimensions.x * 0.43, 0.74, dimensions.z * 0.5 - 0.04)]:
+			var lamp := MeshInstance3D.new()
+			lamp.name = "TurnSignal"
+			lamp.mesh = lens
+			lamp.position = corner
+			lamp.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+			lamp.visible = false
+			add_child(lamp)
+			_indicator_lamps[side].append(lamp)
+
+
+func _ease_steering(target: float, delta: float) -> float:
+	# A steering wheel takes time to wind on and self-centres a little faster.
+	var winding_on := is_zero_approx(steer_angle) or (
+		signf(target) == signf(steer_angle) and absf(target) > absf(steer_angle))
+	steer_angle = move_toward(steer_angle, target, (STEER_IN_RATE if winding_on else STEER_OUT_RATE) * delta)
+	return steer_angle
+
+
+func _update_indicators(delta: float) -> void:
+	# Signal while the wheel is turned, and briefly after it straightens.
+	var side := 0
+	if absf(steer_angle) > INDICATOR_THRESHOLD and absf(speed) > 1.0:
+		side = -1 if steer_angle > 0.0 else 1
+		_indicator_hold = INDICATOR_HOLD
+	elif indicator != 0 and _indicator_hold > 0.0:
+		_indicator_hold -= delta
+		side = indicator
+	if side != indicator:
+		indicator = side
+		_indicator_clock = 0.0
+		_set_indicator_lit(side != 0)
+		return
+	if indicator == 0:
+		return
+	_indicator_clock += delta
+	var lit := fmod(_indicator_clock, BLINK_PERIOD) < BLINK_PERIOD * 0.5
+	if lit != indicator_lit:
+		_set_indicator_lit(lit)
+
+
+func _set_indicator_lit(lit: bool) -> void:
+	indicator_lit = lit
+	for side: int in _indicator_lamps:
+		for lamp: MeshInstance3D in _indicator_lamps[side]:
+			lamp.visible = lit and side == indicator
+	if indicator != 0:
+		Audio.play_from(self, &"indicator", 0.0, 1.0 if lit else 0.8)
+
+
 func set_headlights(active: bool) -> void:
 	if headlights_on == active:
 		return
@@ -267,6 +347,7 @@ func _update_wheels(steer: float, delta: float) -> void:
 func _update_speed(drive: float, delta: float) -> void:
 	var speed_limit := speed_multiplier * (weather.speed_factor if weather else 1.0)
 	var acceleration: float = _profile.acceleration * (weather.acceleration_factor if weather else 1.0)
+	var pull := Vehicles.power_curve(absf(speed) / _profile.top_speed)
 	if is_zero_approx(drive):
 		speed = move_toward(speed, 0.0, COAST_DECELERATION * delta)
 	elif drive * speed < 0.0:
@@ -275,7 +356,7 @@ func _update_speed(drive: float, delta: float) -> void:
 	elif drive > 0.0:
 		var limit: float = _profile.boost_speed if boost_time > 0.0 else _profile.top_speed
 		var boost_acceleration := 1.45 if boost_time > 0.0 else 1.0
-		speed = move_toward(speed, limit * speed_limit * drive, acceleration * boost_acceleration * delta)
+		speed = move_toward(speed, limit * speed_limit * drive, acceleration * pull * boost_acceleration * delta)
 	else:
 		speed = move_toward(speed, REVERSE_SPEED * speed_limit * drive, acceleration * 0.55 * delta)
 
@@ -325,6 +406,10 @@ func respawn() -> void:
 	drifting = false
 	_drift_time = 0.0
 	_drift_gain = 0.0
+	steer_angle = 0.0
+	indicator = 0
+	_indicator_hold = 0.0
+	_set_indicator_lit(false)
 	_fall_speed = 0.0
 	rough_surface = false
 	_wheel_angle = 0.0
