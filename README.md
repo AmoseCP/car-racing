@@ -52,7 +52,7 @@ CarRacing 是使用 Godot 4 制作的 3D 驾驶游戏原型。可驾驶 GT 赛�
 
 ## 从源码运行
 
-用 Godot 4.7.2 打开 `project.godot`，等待素材导入后按 F5。安装同版本的 Godot 导出模板后，可使用项目中的 `Windows x64`、`macOS Apple Silicon` 或 `macOS Intel` 预设导出发行版。公开源码可独立运行，不需要编辑器 MCP 插件。
+用 Godot 4.7.2 打开 `project.godot`，等待素材导入后按 F5。安装同版本的 Godot 导出模板后，可使用项目中的 `Windows x64` 或 `macOS Universal` 预设导出发行版。Godot 官方模板只提供 Universal 版 Mac 程序，发行时用 `tools/split_macos_app.sh` 拆分为 Apple Silicon 与 Intel 两个版本。公开源码可独立运行，不需要编辑器 MCP 插件。
 
 ## 素材署名
 
