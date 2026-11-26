@@ -110,6 +110,8 @@ func _physics_process(delta: float) -> void:
 		steer = motion_steering.steering
 	var handbrake := Input.is_action_pressed(&"race_handbrake")
 	var wants_nitro := Input.is_action_pressed(&"race_nitro")
+	# Foot brake (Space / LB): slows to a stop and holds, never selects reverse.
+	var footbrake := Input.get_action_strength(&"race_footbrake")
 	throttle = drive
 	if controls_locked:
 		drive = 0.0
@@ -119,14 +121,21 @@ func _physics_process(delta: float) -> void:
 	steer = _ease_steering(steer, delta)
 	_update_indicators(delta)
 	boost_time = move_toward(boost_time, 0.0, delta)
-	_update_nitro(wants_nitro and drive >= 0.0, delta)
+	_update_nitro(wants_nitro and drive >= 0.0 and footbrake <= 0.0, delta)
 	if nitro_active:
 		drive = 1.0
+	if footbrake > 0.0:
+		drive = 0.0
+		throttle = -footbrake
 	if _brake_lights:
 		var running_lights := 0.48 if headlights_on else 0.22
-		var braking := (drive < -0.1 and speed > 0.1) or (handbrake and absf(speed) > 0.1)
+		var braking := (drive < -0.1 and speed > 0.1) or (
+			(handbrake or footbrake > 0.0) and absf(speed) > 0.1)
 		_brake_lights.emission_energy_multiplier = 2.0 if braking else running_lights
 	_update_speed(drive, delta)
+	if footbrake > 0.0:
+		var brakes: float = _profile.braking * (weather.brake_factor if weather else 1.0)
+		speed = move_toward(speed, 0.0, brakes * footbrake * delta)
 	if handbrake:
 		speed = move_toward(speed, 0.0, (4.5 if drifting else 13.0) * delta)
 	var steering_grip := clampf(absf(speed) / 7.0, 0.0, 1.0)

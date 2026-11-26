@@ -510,9 +510,9 @@ func _update_hint_visibility(delta: float) -> void:
 func _update_controls() -> void:
 	_hint_seconds = 0.0
 	if _using_pad:
-		_controls.text = "RT 油门    LT 刹车 / 倒车    左摇杆 转向\nA 手刹    B 氮气    X 车灯    视图键 视角    菜单键 暂停"
+		_controls.text = "RT 油门    LT 刹车 / 倒车    LB 刹车\n左摇杆 转向    A 手刹    B 氮气\nX 车灯    视图键 视角    菜单键 暂停"
 	else:
-		_controls.text = "W / ↑ 油门    S / ↓ 刹车 / 倒车    A D / ← → 转向\n空格 手刹    Shift 氮气    H 车灯    C 视角    Esc 暂停"
+		_controls.text = "W / ↑ 油门    S / ↓ 刹车 / 倒车    空格 刹车\nA D / ← → 转向    Q 手刹    Shift 氮气\nH 车灯    C 视角    Esc 暂停"
 
 
 func _panel(parent: Control) -> PanelContainer:

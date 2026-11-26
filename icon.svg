@@ -1,1 +1,54 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="128" height="128"><rect width="124" height="124" x="2" y="2" fill="#363d52" stroke="#212532" stroke-width="4" rx="14"/><g fill="#fff" transform="translate(12.322 12.322)scale(.101)"><path d="M105 673v33q407 354 814 0v-33z"/><path fill="#478cbf" d="m105 673 152 14q12 1 15 14l4 67 132 10 8-61q2-11 15-15h162q13 4 15 15l8 61 132-10 4-67q3-13 15-14l152-14V427q30-39 56-81-35-59-83-108-43 20-82 47-40-37-88-64 7-51 8-102-59-28-123-42-26 43-46 89-49-7-98 0-20-46-46-89-64 14-123 42 1 51 8 102-48 27-88 64-39-27-82-47-48 49-83 108 26 42 56 81zm0 33v39c0 276 813 276 814 0v-39l-134 12-5 69q-2 10-14 13l-162 11q-12 0-16-11l-10-65H446l-10 65q-4 11-16 11l-162-11q-12-3-14-13l-5-69z"/><path d="M483 600c0 34 58 34 58 0v-86c0-34-58-34-58 0z"/><circle cx="725" cy="526" r="90"/><circle cx="299" cy="526" r="90"/></g><g fill="#414042" transform="translate(12.322 12.322)scale(.101)"><circle cx="307" cy="532" r="60"/><circle cx="717" cy="532" r="60"/></g></svg>
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
+  <defs>
+    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#121c31"/>
+      <stop offset="0.6" stop-color="#2b2b58"/>
+      <stop offset="1" stop-color="#5b3768"/>
+    </linearGradient>
+    <linearGradient id="sun" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#ffe27c"/>
+      <stop offset="1" stop-color="#ff6f47"/>
+    </linearGradient>
+    <linearGradient id="road" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#252f45"/>
+      <stop offset="1" stop-color="#1a2232"/>
+    </linearGradient>
+    <linearGradient id="body" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#ffd27a"/>
+      <stop offset="1" stop-color="#f29a3c"/>
+    </linearGradient>
+    <clipPath id="tile"><rect width="512" height="512" rx="112"/></clipPath>
+    <clipPath id="above"><rect width="512" height="270"/></clipPath>
+    <clipPath id="disc"><circle cx="256" cy="270" r="122"/></clipPath>
+  </defs>
+  <g clip-path="url(#tile)">
+    <rect width="512" height="512" fill="url(#sky)"/>
+    <g clip-path="url(#above)">
+      <circle cx="256" cy="270" r="122" fill="url(#sun)"/>
+      <g clip-path="url(#disc)">
+        <rect x="120" y="206" width="272" height="7" fill="#3a2e62"/>
+        <rect x="120" y="227" width="272" height="10" fill="#45306a"/>
+        <rect x="120" y="250" width="272" height="13" fill="#52346c"/>
+      </g>
+    </g>
+    <rect y="270" width="512" height="242" fill="#0d1524"/>
+    <rect y="266" width="512" height="6" fill="#ff9a5a"/>
+    <polygon points="240,270 272,270 476,512 36,512" fill="url(#road)"/>
+    <polygon points="237,270 242,270 66,512 26,512" fill="#64f5cb"/>
+    <polygon points="270,270 275,270 486,512 446,512" fill="#64f5cb"/>
+    <polygon points="254,284 258,284 259,298 253,298" fill="#ffbd64"/>
+    <polygon points="252,318 260,318 262,342 250,342" fill="#ffbd64"/>
+    <g>
+      <rect x="170" y="436" width="44" height="40" rx="9" fill="#06090f"/>
+      <rect x="298" y="436" width="44" height="40" rx="9" fill="#06090f"/>
+      <polygon points="200,394 220,346 292,346 312,394" fill="#e08a32"/>
+      <polygon points="214,390 228,358 284,358 298,390" fill="#1a2740"/>
+      <rect x="152" y="378" width="208" height="10" rx="4" fill="#20252f"/>
+      <rect x="160" y="390" width="192" height="62" rx="20" fill="url(#body)"/>
+      <rect x="174" y="404" width="50" height="13" rx="5" fill="#ff2f2f"/>
+      <rect x="288" y="404" width="50" height="13" rx="5" fill="#ff2f2f"/>
+      <rect x="236" y="426" width="40" height="15" rx="3" fill="#f4f1e8"/>
+      <rect x="176" y="452" width="160" height="9" rx="4" fill="#1b1f27"/>
+    </g>
+  </g>
+</svg>
