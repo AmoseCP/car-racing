@@ -15,7 +15,11 @@ var _centers: PackedVector3Array
 var _outward: PackedVector3Array
 var _distance: PackedFloat32Array
 var _gate_indices: PackedInt32Array
+var _curve_segments := 0
+var _crossing_gaps := {}
 var _scenery_batches: Dictionary = {}
+var _foliage: Array[MeshInstance3D] = []
+var _season_materials: Dictionary[StandardMaterial3D, StandardMaterial3D] = {}
 var _roof_first := 0
 var _roof_segments := 0
 var _roof_half_width := 0.0
@@ -26,6 +30,10 @@ func _ready() -> void:
 	half_road = course.width
 	_wall_offset = half_road + 1.9
 	_sample_centerline()
+	for gate_index in range(1, _gate_indices.size()):
+		var center := _gate_indices[gate_index]
+		for segment in range(center - 1, center + 1):
+			_crossing_gaps[posmod(segment, _centers.size())] = true
 	_add_track()
 	_add_start_grid()
 	_add_boost_pads()
@@ -39,38 +47,32 @@ func _ready() -> void:
 
 
 func _sample_centerline() -> void:
-	var oval: Vector3 = course.oval
-	var bend: Vector2 = course.bend
-	var corners := [
-		Vector3(oval.x, 0, oval.y), Vector3(-oval.x, 0, oval.y),
-		Vector3(-oval.x, 0, -oval.y), Vector3(oval.x, 0, -oval.y),
-	]
-	var middles := PackedInt32Array()
-	for corner in range(corners.size()):
-		for step in range(13):
-			var angle := (corner + step / 12.0) * PI * 0.5
-			var normal := Vector3(cos(angle), 0, sin(angle))
-			_centers.append(corners[corner] + normal * oval.z)
-		var straight_start := _centers[-1]
-		var straight_end: Vector3 = straight_start + corners[(corner + 1) % corners.size()] - corners[corner]
-		var half_segments := ceili(straight_start.distance_to(straight_end) / 6.0)
-		var segments := half_segments * 2
-		middles.append(_centers.size() - 1 + half_segments)
-		for step in range(1, segments):
-			_centers.append(straight_start.lerp(straight_end, float(step) / segments))
-	for i in range(_centers.size()):
-		var point := _centers[i]
-		_centers[i] += Vector3(bend.x * sin(point.z * PI / oval.y), 0,
-			bend.y * sin(point.x * PI / oval.x))
+	var shape: Vector2 = course.route
+	var half_straight := shape.x
+	var radius := shape.y
+	var straight_segments := ceili(half_straight * 2.0 / 5.0)
+	_curve_segments = ceili(PI * radius / 2.8)
+	for side in [1.0, -1.0]:
+		for step in range(straight_segments):
+			var z := lerpf(-half_straight, half_straight, float(step) / straight_segments)
+			_centers.append(Vector3(side * radius, 0, side * z))
+		for step in range(_curve_segments):
+			var angle := PI * step / _curve_segments
+			_centers.append(Vector3(side * radius * cos(angle), 0,
+				side * (half_straight + radius * sin(angle))))
 	_distance.append(0.0)
 	for i in range(_centers.size()):
 		var next := _centers[(i + 1) % _centers.size()]
 		var tangent := (next - _centers[i - 1]).normalized()
 		_outward.append(Vector3(tangent.z, 0, -tangent.x))
 		_distance.append(_distance[i] + _centers[i].distance_to(next))
-	for i in [3, 2, 1, 0]:
-		_gate_indices.append(middles[i])
-		gates.append(_course_transform(middles[i]))
+	var left := straight_segments + _curve_segments
+	_gate_indices = PackedInt32Array([
+		roundi(straight_segments * 0.68), roundi(straight_segments * 0.27),
+		left + roundi(straight_segments * 0.73), left + roundi(straight_segments * 0.28),
+	])
+	for index in _gate_indices:
+		gates.append(_course_transform(index))
 
 
 func _course_transform(index: int) -> Transform3D:
@@ -82,15 +84,82 @@ func _course_transform(index: int) -> Transform3D:
 func spawn_transform() -> Transform3D:
 	var index := (_gate_indices[0] + 4) % _centers.size()
 	var start := _course_transform(index)
+	start.origin += start.basis.x * lane_offset(0)
 	start.origin.y = 0.05
 	return start
+
+
+## Road progress of a start-grid box; offset counts centreline samples behind the line.
+func grid_progress(offset: int) -> float:
+	var index := (_gate_indices[0] + offset) % _centers.size()
+	return fposmod(road_length() - _distance[index], road_length())
+
+
+func lane_offset(lane: int) -> float:
+	return signf(lane + 0.5) * (0.14 + (absf(lane + 0.5)) * (half_road - 0.69) * 0.5)
+
+
+func control_distance(gate: int) -> float:
+	return fposmod(road_length() - _distance[_gate_indices[gate]], road_length())
+
+
+func road_length() -> float:
+	return _distance[-1]
+
+
+func tunnel_portals() -> Vector2:
+	var entry := posmod(_roof_first + _roof_segments, _centers.size())
+	var exit := posmod(_roof_first, _centers.size())
+	var length := road_length()
+	return Vector2(fposmod(length - _distance[entry], length), fposmod(length - _distance[exit], length))
+
+
+func centerline() -> PackedVector3Array:
+	return _centers
+
+
+func road_pose(progress: float, offset: float = 0.0, direction: int = 1) -> Transform3D:
+	var length := road_length()
+	var distance := fposmod(length - progress, length)
+	var next := clampi(_distance.bsearch(distance, false), 1, _centers.size())
+	var current := next - 1
+	var weight := inverse_lerp(_distance[current], _distance[next], distance)
+	next %= _centers.size()
+	var right := _outward[current].lerp(_outward[next], weight).normalized()
+	var origin := _centers[current].lerp(_centers[next], weight) + right * offset
+	var facing := right * direction
+	return Transform3D(Basis(facing, Vector3.UP, Vector3(-facing.z, 0, facing.x)), origin)
+
+
+func road_location(point: Vector3) -> Vector2:
+	point.y = 0.0
+	var best := INF
+	var location := Vector2.ZERO
+	for index in range(_centers.size()):
+		var start := _centers[index]
+		var edge := _centers[(index + 1) % _centers.size()] - start
+		var weight := clampf((point - start).dot(edge) / edge.length_squared(), 0.0, 1.0)
+		var separation := point - (start + edge * weight)
+		var squared := separation.length_squared()
+		if squared < best:
+			best = squared
+			var right := Vector3(edge.z, 0, -edge.x).normalized()
+			var distance := lerpf(_distance[index], _distance[index + 1], weight)
+			location = Vector2(fposmod(road_length() - distance, road_length()), separation.dot(right))
+	return location
 
 
 func _add_track() -> void:
 	var asphalt := Art.road()
 	var shoulder := Art.ground(course_id, 1.0)
 	var chalk := _material(Color("f0ebdc"))
-	var coral := _material(Color("df5235"))
+	var yellow := _material(Color("efb44e"))
+	chalk.emission_enabled = true
+	chalk.emission = Color("cec5aa")
+	chalk.emission_energy_multiplier = 0.065
+	yellow.emission_enabled = true
+	yellow.emission = Color("e8a838")
+	yellow.emission_energy_multiplier = 0.09
 	var rail := _material(Color("6b7780"))
 	var reflective := _material(course.accent)
 	rail.cull_mode = BaseMaterial3D.CULL_DISABLED
@@ -100,20 +169,20 @@ func _add_track() -> void:
 	_add_strip("Shoulder", -_wall_offset - 0.3, _wall_offset + 0.3, 0.012, 0.012, shoulder)
 	_add_strip("Asphalt", -half_road, half_road, 0.024, 0.024, asphalt)
 	for side in [-1.0, 1.0]:
-		var curb_start: float = side * half_road - 0.4
-		var curb_end: float = side * half_road + 0.4
-		_add_strip("WhiteCurb", curb_start, curb_end, 0.04, 0.04, chalk, 0)
-		_add_strip("RedCurb", curb_start, curb_end, 0.04, 0.04, coral, 1)
+		var center: float = side * 0.14
+		_add_strip("CenterLine", center - 0.055, center + 0.055, 0.033, 0.033, yellow, -1, 0, -1, true)
+		var separator: float = side * (0.14 + (half_road - 0.69) * 0.5)
+		_add_strip("LaneLine", separator - 0.06, separator + 0.06, 0.033, 0.033, chalk, 0, 0, -1, true)
 		var edge: float = side * (half_road - 0.5)
 		_add_strip("EdgeLine", edge - 0.055, edge + 0.055, 0.033, 0.033, chalk)
 		var wall: float = side * _wall_offset
-		var wall_mesh := _add_strip("Guardrail", wall, wall, 0.012, 0.88, rail)
-		_add_strip("GuardrailCap", wall - 0.10, wall + 0.10, 0.88, 0.88, rail)
-		_add_strip("GuardrailRib", wall - side * 0.07, wall - side * 0.07, 0.27, 0.38, rail)
+		var wall_mesh := _add_strip("Guardrail", wall, wall, 0.012, 0.88, rail, -1, 0, -1, true)
+		_add_strip("GuardrailCap", wall - 0.10, wall + 0.10, 0.88, 0.88, rail, -1, 0, -1, true)
+		_add_strip("GuardrailRib", wall - side * 0.07, wall - side * 0.07, 0.27, 0.38, rail, -1, 0, -1, true)
 		_add_strip("Reflectors", wall + side * 0.012, wall + side * 0.012,
-			0.69, 0.79, reflective, 0)
+			0.69, 0.79, reflective, 0, 0, -1, true)
 		_add_strip("InsideReflectors", wall - side * 0.012, wall - side * 0.012,
-			0.69, 0.79, reflective, 0)
+			0.69, 0.79, reflective, 0, 0, -1, true)
 		var barrier := StaticBody3D.new()
 		barrier.name = "OuterBarrier" if side > 0 else "InnerBarrier"
 		var collider := CollisionShape3D.new()
@@ -125,7 +194,8 @@ func _add_track() -> void:
 
 
 func _add_strip(node_name: String, offset_a: float, offset_b: float, height_a: float,
-		height_b: float, material: Material, parity := -1, first := 0, length := -1) -> ArrayMesh:
+		height_b: float, material: Material, parity := -1, first := 0, length := -1,
+		crossing_gaps := false) -> ArrayMesh:
 	var surface := SurfaceTool.new()
 	surface.begin(Mesh.PRIMITIVE_TRIANGLES)
 	surface.set_material(material)
@@ -134,6 +204,8 @@ func _add_strip(node_name: String, offset_a: float, offset_b: float, height_a: f
 	for segment in range(first, first + count):
 		var i := posmod(segment, _centers.size())
 		if parity >= 0 and i % 2 != parity:
+			continue
+		if crossing_gaps and _crossing_gaps.has(i):
 			continue
 		var next := (i + 1) % _centers.size()
 		var a := _edge_point(i, offset_a, height_a)
@@ -176,7 +248,7 @@ func _add_start_grid() -> void:
 	for lane in range(2):
 		for slot in range(3):
 			var index := (_gate_indices[0] + 2 + slot * 2 + lane) % _centers.size()
-			var x := (lane * 2.0 - 1.0) * half_road * 0.44
+			var x := lane_offset(lane)
 			_place_box("GridLine", Vector3(2.55, 0.012, 0.115), _course_transform(index),
 				Vector3(x, 0.034, 0), chalk)
 	var post := _wall_offset + 1.1
@@ -199,9 +271,9 @@ func _add_start_grid() -> void:
 func _add_boost_pads() -> void:
 	var blue := _glow(Color("178393"), 0.55)
 	var mint := _glow(Color("63fcda"), 0.85)
-	for placement in [Vector2i(0, -1), Vector2i(1, 1), Vector2i(3, 0)]:
+	for placement in [Vector2i(0, 0), Vector2i(1, 1), Vector2i(3, 0)]:
 		var index := posmod(_gate_indices[placement.x] - 5, _centers.size())
-		var pad := _course_transform(index).translated_local(Vector3(placement.y * half_road * 0.44, 0, 0))
+		var pad := _course_transform(index).translated_local(Vector3(lane_offset(placement.y), 0, 0))
 		boost_pads.append(pad)
 		_place_box("BoostPad", Vector3(3.7, 0.018, 3.3), pad, Vector3(0, 0.046, 0), blue)
 		for z in [-0.9, 0.0, 0.9]:
@@ -231,6 +303,8 @@ func _add_landscape() -> void:
 		var x := rng.randf_range(-31, 31)
 		var z := rng.randf_range(-44, 44)
 		var size := rng.randf_range(0.24, 1.2)
+		if _near_course(Vector3(x, 0, z), _wall_offset + 1.4):
+			continue
 		if i % 3 == 0:
 			_add_column("Scrub", size, size * 0.35, size * 0.72, Vector3(x, size * 0.36, z), brush)
 		else:
@@ -252,18 +326,20 @@ func _add_city() -> void:
 	var window_warm := _glow(Color("ffbd7e"), 0.8)
 	var window_cool := _glow(Color("9bd2ff"), 0.52)
 	for side in [-1.0, 1.0]:
+		var inner: float = side * (_wall_offset + 0.22)
+		var outer: float = side * (_wall_offset + 3.12)
+		_add_strip("Sidewalk", minf(inner, outer), maxf(inner, outer), 0.12, 0.12, pavement)
 		for i in range(2, _centers.size(), 4):
 			var frame := _course_transform(i)
 			var x: float = side * (_wall_offset + 1.8)
-			_place_box("Sidewalk", Vector3(2.5, 0.18, 4.4), frame, Vector3(x, 0.09, 0), pavement)
 			_place_box("LampPost", Vector3(0.12, 4.8, 0.12), frame, Vector3(x, 2.4, 0), glass)
 			_place_box("StreetLight", Vector3(0.92, 0.16, 0.45), frame,
 				Vector3(x - side * 0.28, 4.8, 0), window_warm)
 	# A fixed block grid keeps façades aligned and leaves sightlines along the streets.
 	for x in range(-92, 93, 17):
-		for z in range(-89, 90, 17):
+		for z in range(-106, 107, 17):
 			var base := Vector3(x, 0, z)
-			if _near_course(base, 19.0):
+			if _near_course(base, _wall_offset + 12.0):
 				continue
 			var tall := rng.randf_range(9.0, 26.0)
 			var width := rng.randf_range(7.0, 12.0)
@@ -303,8 +379,8 @@ func _add_tunnel() -> void:
 	concrete.cull_mode = BaseMaterial3D.CULL_DISABLED
 	lining.cull_mode = BaseMaterial3D.CULL_DISABLED
 	cyan.cull_mode = BaseMaterial3D.CULL_DISABLED
-	var length := 38
-	var first := _gate_indices[0] - 6 - length
+	var length := _curve_segments + 4
+	var first := _centers.size() - _curve_segments - 2
 	var span := _wall_offset + 0.32
 	_roof_first = first
 	_roof_segments = length
@@ -369,7 +445,7 @@ func _add_grassland() -> void:
 			_add_column("Meadow", size, size * 0.15, size * 0.42,
 				p + Vector3.UP * size * 0.21, flowers if i % 7 == 0 else grass)
 	for x in [-108.0, -47.0, 3.0, 61.0, 116.0]:
-		_add_column("LowHill", 27, 8, 9, Vector3(x, 4.3, -121), grass)
+		_add_column("LowHill", 27, 8, 9, Vector3(x, 4.3, -137), grass)
 	for i in range(0, _centers.size(), 2):
 		for side in [-1.0, 1.0]:
 			var p := _edge_point(i, side * (_wall_offset + rng.randf_range(0.55, 2.3)), 0)
@@ -456,6 +532,27 @@ func _add_prop(scene: PackedScene, origin: Vector3, size: Vector3, yaw: float) -
 	var prop := scene.instantiate() as Node3D
 	prop.transform = Transform3D(Basis(Vector3.UP, yaw).scaled_local(size), origin)
 	add_child(prop, true)
+	if scene in [Art.ROADSIDE_GRASS, Art.FOREST_FIR, Art.ROADSIDE_PINE]:
+		if prop is MeshInstance3D:
+			_foliage.append(prop)
+		for child in prop.find_children("*", "MeshInstance3D", true, false):
+			_foliage.append(child)
+
+
+func set_foliage_tint(tint: Color) -> void:
+	if _season_materials.is_empty():
+		for mesh in _foliage:
+			if mesh.mesh == null:
+				continue
+			for index in range(mesh.mesh.get_surface_count()):
+				var original := mesh.get_active_material(index) as StandardMaterial3D
+				if original == null:
+					continue
+				if not _season_materials.has(original):
+					_season_materials[original] = original.duplicate()
+				mesh.set_surface_override_material(index, _season_materials[original])
+	for original in _season_materials:
+		_season_materials[original].albedo_color = original.albedo_color * tint
 
 
 func _place_box(node_name: String, size: Vector3, frame: Transform3D, local: Vector3,

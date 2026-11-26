@@ -14,9 +14,11 @@ var _boost: Label
 var _speed: Label
 var _acceleration: Label
 var _stat_bars: Array[ProgressBar] = []
+var _livery := 0
 
 
-func setup(selected: StringName, from_pause: bool) -> void:
+func setup(selected: StringName, from_pause: bool, livery := 0) -> void:
+	_livery = livery
 	add_theme_constant_override("separation", 22)
 	var list := VBoxContainer.new()
 	list.custom_minimum_size.x = 253
@@ -67,7 +69,7 @@ func setup(selected: StringName, from_pause: bool) -> void:
 
 func _show_vehicle(id: StringName) -> void:
 	var profile: Dictionary = Vehicles.DATA[id]
-	_preview.show_vehicle(id)
+	_preview.show_vehicle(id, _livery)
 	_role.text = "%s · %s" % [profile.name, profile.type]
 	_role.add_theme_color_override("font_color", profile.accent)
 	_description.text = profile.description

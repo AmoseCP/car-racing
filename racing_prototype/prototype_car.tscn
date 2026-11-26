@@ -1,8 +1,16 @@
 [gd_scene format=3]
 
 [ext_resource type="PackedScene" path="res://racing_prototype/art/models/endurance_prototype.glb" id="1_prototype"]
+[ext_resource type="PackedScene" path="res://racing_prototype/license_plate.tscn" id="2_plate"]
 
 [node name="CarModel" type="Node3D"]
 
 [node name="Prototype" parent="." instance=ExtResource("1_prototype")]
 transform = Transform3D(-0.98, 0, 0, 0, 0.94, 0, 0, 0, -0.83, 0, 0, 0.025)
+
+[node name="RearPlate" parent="." instance=ExtResource("2_plate")]
+position = Vector3(0, 0.35, 2.181)
+
+[node name="FrontPlate" parent="." instance=ExtResource("2_plate")]
+position = Vector3(0, 0.27, -2.006)
+rotation_degrees = Vector3(0, 180, 0)

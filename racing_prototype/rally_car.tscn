@@ -1,8 +1,16 @@
 [gd_scene format=3]
 
 [ext_resource type="PackedScene" path="res://racing_prototype/art/models/rally_car.glb" id="1_rally"]
+[ext_resource type="PackedScene" path="res://racing_prototype/license_plate.tscn" id="2_plate"]
 
 [node name="CarModel" type="Node3D"]
 
 [node name="Rally" parent="." instance=ExtResource("1_rally")]
 transform = Transform3D(-0.94, 0, 0, 0, 0.86, 0, 0, 0, -0.90, 0, 0, 0)
+
+[node name="RearPlate" parent="." instance=ExtResource("2_plate")]
+position = Vector3(0, 0.37, 1.792)
+
+[node name="FrontPlate" parent="." instance=ExtResource("2_plate")]
+position = Vector3(0, 0.38, -1.851)
+rotation_degrees = Vector3(0, 180, 0)

@@ -1,6 +1,7 @@
 extends Node3D
 
 const Modes := preload("res://racing_prototype/weather_modes.gd")
+const WorldClock := preload("res://racing_prototype/world_clock.gd")
 const SURFACE_SHADER_PATH := "res://racing_prototype/weather_surface.gdshader"
 const TRANSITION_SECONDS := 2.4
 
@@ -34,23 +35,33 @@ var _snow: GPUParticles3D
 @onready var _camera: Camera3D = $"../ChaseCamera"
 
 
-func configure(mode: StringName) -> void:
+func configure(mode: StringName, seconds: float, streamed_surfaces: Array[ShaderMaterial] = []) -> void:
 	_mode = mode if Modes.NAMES.has(mode) else Modes.DYNAMIC
-	var shader := load(SURFACE_SHADER_PATH) as Shader
-	_bind_surface(_track.get_node("Asphalt"), shader, 0.39)
-	_bind_surface(_track.get_node("Shoulder"), shader, 0.92)
-	_bind_surface($"../Ground/Surface", shader, 0.98)
+	if streamed_surfaces.is_empty():
+		_bind_surface(_track.get_node("Asphalt"), 0.39)
+		_bind_surface(_track.get_node("Shoulder"), 0.92)
+		_bind_surface($"../Ground/Surface", 0.98)
+	else:
+		_surfaces.assign(streamed_surfaces)
 	var falloff := _build_particle_texture()
 	_rain = _make_precipitation("Rain", RAIN_EFFECT, falloff)
 	_snow = _make_precipitation("Snow", SNOW_EFFECT, falloff)
-	reset()
+	reset(seconds)
 
 
-func reset() -> void:
-	stage = Modes.at_time(_mode, 0.0)
+func reset(seconds: float) -> void:
+	stage = Modes.at_time(_mode, seconds)
 	rain_strength = 1.0 if stage == Modes.RAIN else 0.0
 	snow_strength = 1.0 if stage == Modes.SNOW else 0.0
 	_apply_conditions()
+
+
+func set_season(season: WorldClock.Season) -> void:
+	var winter := season == WorldClock.Season.WINTER
+	_surfaces[0].set_shader_parameter("seasonal_snow", 0.035 if winter else 0.0)
+	for index in range(1, _surfaces.size()):
+		_surfaces[index].set_shader_parameter("season_tint", WorldClock.GROUND_TINT[season])
+		_surfaces[index].set_shader_parameter("seasonal_snow", 0.88 if winter else 0.0)
 
 
 func advance(seconds: float, delta: float) -> void:
@@ -63,6 +74,10 @@ func advance(seconds: float, delta: float) -> void:
 	rain_strength = rain
 	snow_strength = snow
 	_apply_conditions()
+
+
+func audible_rain() -> float:
+	return rain_strength if _rain.visible else 0.0
 
 
 func _apply_conditions() -> void:
@@ -101,12 +116,18 @@ func _set_emitter(emitter: GPUParticles3D, strength: float) -> void:
 	emitter.amount_ratio = strength
 
 
-func _bind_surface(surface: MeshInstance3D, shader: Shader, snow_retention: float) -> void:
+func _bind_surface(surface: MeshInstance3D, snow_retention: float) -> void:
 	var original := surface.material_override as StandardMaterial3D
 	if original == null:
 		original = surface.mesh.surface_get_material(0) as StandardMaterial3D
+	var material := surface_material(original, snow_retention)
+	surface.material_override = material
+	_surfaces.append(material)
+
+
+static func surface_material(original: StandardMaterial3D, snow_retention: float) -> ShaderMaterial:
 	var material := ShaderMaterial.new()
-	material.shader = shader
+	material.shader = load(SURFACE_SHADER_PATH) as Shader
 	material.set_shader_parameter("surface_color", original.albedo_texture)
 	material.set_shader_parameter("surface_normal", original.normal_texture)
 	material.set_shader_parameter("surface_roughness", original.roughness_texture)
@@ -116,8 +137,7 @@ func _bind_surface(surface: MeshInstance3D, shader: Shader, snow_retention: floa
 	material.set_shader_parameter("roughness_strength", original.roughness)
 	material.set_shader_parameter("base_specular", original.metallic_specular)
 	material.set_shader_parameter("snow_retention", snow_retention)
-	surface.material_override = material
-	_surfaces.append(material)
+	return material
 
 
 func _build_particle_texture() -> GradientTexture2D:

@@ -1,6 +1,7 @@
 extends Node
 
 const Modes := preload("res://racing_prototype/lighting_modes.gd")
+const WorldClock := preload("res://racing_prototype/world_clock.gd")
 const NIGHT_PANORAMA := preload("res://racing_prototype/art/skies/qwantani_night_puresky.hdr")
 const SKY_SWITCH := 0.74
 
@@ -13,6 +14,7 @@ var _day_sky: Sky
 var _night_sky: Sky
 var _daylight: Dictionary
 var _last_weather := Vector2(-1, -1)
+var _last_season := -1
 
 @onready var _world: WorldEnvironment = $"../WorldEnvironment"
 @onready var _sun: DirectionalLight3D = $"../Sun"
@@ -41,15 +43,16 @@ func configure(mode: StringName) -> void:
 	}
 
 
-func advance(seconds: float, rain: float, snow: float) -> void:
+func advance(seconds: float, rain: float, snow: float, season: WorldClock.Season) -> void:
 	var phase := Modes.phase_at(_mode, seconds)
 	phase_name = Modes.phase_name(phase)
 	var night := Modes.darkness_at(phase)
 	var weather := Vector2(rain, snow)
-	if night == darkness and weather == _last_weather:
+	if night == darkness and weather == _last_weather and season == _last_season:
 		return
 	darkness = night
 	_last_weather = weather
+	_last_season = season
 	var storm := rain + snow
 	var sky_brightness := 1.0 - 0.48 * rain - 0.17 * snow
 	_set_sky(night, sky_brightness)
@@ -65,6 +68,7 @@ func advance(seconds: float, rain: float, snow: float) -> void:
 	_sun.light_energy = lerpf(_daylight.sun, 0.025, night) * (1.0 - 0.67 * rain - 0.49 * snow)
 	var twilight := 4.0 * night * (1.0 - night)
 	var sunlight: Color = _daylight.sun_color
+	sunlight = sunlight.lerp(WorldClock.SUN_TINT[season], 0.52)
 	sunlight = sunlight.lerp(Color("ffbd83"), 0.6 * twilight * (1.0 - storm))
 	_sun.light_color = sunlight.lerp(Color("b7c9e9"), storm).lerp(Color("849bd5"), night * night)
 

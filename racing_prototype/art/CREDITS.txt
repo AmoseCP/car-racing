@@ -23,3 +23,23 @@ Modular Urban Apartments Facade: https://polyhaven.com/a/modular_urban_apartment
 Grass Medium 01: https://polyhaven.com/a/grass_medium_01
 Pine Sapling Small: https://polyhaven.com/a/pine_sapling_small
 Fir Sapling (simplified model and rendered background foliage): https://polyhaven.com/a/fir_sapling
+
+Traffic sedan, SUV, taxi, delivery van and pickup from Kenney Car Kit 3.1 (CC0 1.0).
+https://kenney.nl/assets/car-kit
+
+Vehicle audio
+Car Engine Loop 96kHz, 4s by qubodup, CC BY 3.0
+https://opengameart.org/content/car-engine-loop-96khz-4s
+Car tire squeal skid loop by audible-edge (Tom Haigh), loop edited by qubodup, CC BY 3.0
+https://opengameart.org/content/car-tire-squeal-skid-loop
+https://creativecommons.org/licenses/by/3.0/
+
+Car engine start 01 by looneybits, CC0 1.0
+https://opengameart.org/content/car-engine-start-01
+Rain on Window Loop by alxl, used under CC0 1.0
+https://opengameart.org/content/rain-on-window-loop
+Metal Impact Sounds (thud3.wav) by Brian MacIntosh, CC0 1.0
+https://opengameart.org/content/metal-impact-sounds
+https://creativecommons.org/publicdomain/zero/1.0/
+
+These recordings were converted to mono PCM, resampled and filtered for the game mix.

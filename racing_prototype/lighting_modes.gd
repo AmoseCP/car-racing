@@ -6,11 +6,13 @@ const NIGHT := &"night"
 const ORDER := [CYCLE, DAY, NIGHT]
 const NAMES := {CYCLE: "昼夜循环", DAY: "白天", NIGHT: "夜晚"}
 
-const DUSK_START := 9.0
-const NIGHT_START := 19.0
-const DAWN_START := 38.0
-const DAY_START := 48.0
-const CYCLE_LENGTH := 54.0
+const DAY_NIGHT_SECONDS := 150.0
+const TRANSITION_SECONDS := 12.0
+const NIGHT_START := DAY_NIGHT_SECONDS
+const DUSK_START := NIGHT_START - TRANSITION_SECONDS
+const DAY_START := DAY_NIGHT_SECONDS * 2.0
+const DAWN_START := DAY_START - TRANSITION_SECONDS
+const CYCLE_LENGTH := DAY_START
 
 
 static func phase_at(mode: StringName, seconds: float) -> float:

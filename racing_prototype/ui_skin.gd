@@ -1,5 +1,7 @@
 extends RefCounted
 
+const Audio := preload("res://racing_prototype/game_audio.gd")
+
 const INK := Color("101929f4")
 const TEXT := Color("fff4dc")
 const MUTED := Color("b8c6d9")
@@ -52,7 +54,12 @@ static func menu_button(parent: Control, caption: String, action: Callable, heig
 	button.alignment = HORIZONTAL_ALIGNMENT_LEFT
 	button.custom_minimum_size.y = height
 	button.add_theme_font_size_override("font_size", 18)
-	button.pressed.connect(action)
+	button.focus_entered.connect(func(): Audio.play_from(button, &"menu_move"))
+	button.pressed.connect(func():
+		var cue := &"menu_back" if caption == "返回" or caption.begins_with("返回主菜单") else &"menu_accept"
+		Audio.play_from(button, cue)
+		action.call()
+	)
 	parent.add_child(button)
 	return button
 

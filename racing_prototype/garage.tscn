@@ -2,6 +2,7 @@
 
 [ext_resource type="Script" path="res://racing_prototype/garage.gd" id="1_garage"]
 [ext_resource type="Script" path="res://racing_prototype/motion_steering.gd" id="2_motion"]
+[ext_resource type="Script" path="res://racing_prototype/game_audio.gd" id="3_audio"]
 
 [node name="CarRacing" type="Node"]
 process_mode = 3
@@ -12,3 +13,6 @@ layer = 4
 
 [node name="MotionSteering" type="Node" parent="."]
 script = ExtResource("2_motion")
+
+[node name="Audio" type="Node" parent="."]
+script = ExtResource("3_audio")

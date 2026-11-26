@@ -1,14 +1,37 @@
 extends CharacterBody3D
 
+signal impact(speed_toward_surface: float)
+signal drift_finished(seconds: float, nitro_gained: float)
+
 const Vehicles := preload("res://racing_prototype/vehicles.gd")
 const RaceWeather := preload("res://racing_prototype/race_weather.gd")
+const Audio := preload("res://racing_prototype/game_audio.gd")
+const DrivingAudio := preload("res://racing_prototype/car_audio.gd")
 const REVERSE_SPEED := 10.0
 const COAST_DECELERATION := 5.0
 const GRAVITY := 27.0
+const DRIFT_MIN_SPEED := 11.0
+const DRIFT_SLIP := 0.2
+const MAX_SLIP := 0.72
+const NITRO_SECONDS := 2.6
+const NITRO_GAIN := 0.36
 
 @export var vehicle_id: StringName = Vehicles.DEFAULT
+@export var livery := 0
 
 var speed := 0.0
+var speed_multiplier := 1.0
+## Last drive input: positive accelerator, negative brake / reverse.
+var throttle := 0.0
+var rough_surface := false
+## Holds the car on the grid while still letting the driver rev the engine.
+var controls_locked := false
+## Nitro tank, 0..1. Filled by drifting, burnt with the nitro button.
+var nitro := 0.0
+var nitro_active := false
+## Angle between the direction of travel and the car's heading (radians).
+var slip := 0.0
+var drifting := false
 var boost_time := 0.0
 var headlights_on := false
 var motion_steering: Node
@@ -23,6 +46,11 @@ var _headlights: Array[SpotLight3D] = []
 var _profile: Dictionary
 var _body: MeshInstance3D
 var _wheels: Array[Node3D] = []
+var _audio: DrivingAudio
+var _paints: Array[StandardMaterial3D] = []
+var _factory_colors: Array[Color] = []
+var _drift_time := 0.0
+var _drift_gain := 0.0
 
 @onready var _vehicle_model: Node3D = $CarModel
 @onready var _collider: CollisionShape3D = $CollisionShape3D
@@ -47,7 +75,11 @@ func _ready() -> void:
 	for wheel in _wheels:
 		_wheel_rest.append(wheel.basis)
 	_tune_body_materials()
+	apply_livery(livery)
 	_create_headlights()
+	_audio = DrivingAudio.new()
+	_audio.name = "DrivingAudio"
+	add_child(_audio)
 
 
 func _physics_process(delta: float) -> void:
@@ -56,26 +88,100 @@ func _physics_process(delta: float) -> void:
 	var manual := Input.is_action_pressed(&"race_left") or Input.is_action_pressed(&"race_right")
 	if motion_steering and not manual:
 		steer = motion_steering.steering
+	var handbrake := Input.is_action_pressed(&"race_handbrake")
+	var wants_nitro := Input.is_action_pressed(&"race_nitro")
+	throttle = drive
+	if controls_locked:
+		drive = 0.0
+		steer = 0.0
+		handbrake = false
+		wants_nitro = false
+	boost_time = move_toward(boost_time, 0.0, delta)
+	_update_nitro(wants_nitro and drive >= 0.0, delta)
+	if nitro_active:
+		drive = 1.0
 	if _brake_lights:
 		var running_lights := 0.48 if headlights_on else 0.22
-		_brake_lights.emission_energy_multiplier = 2.0 if drive < -0.1 and speed > 0.1 else running_lights
-	boost_time = move_toward(boost_time, 0.0, delta)
+		var braking := (drive < -0.1 and speed > 0.1) or (handbrake and absf(speed) > 0.1)
+		_brake_lights.emission_energy_multiplier = 2.0 if braking else running_lights
 	_update_speed(drive, delta)
+	if handbrake:
+		speed = move_toward(speed, 0.0, (4.5 if drifting else 13.0) * delta)
 	var steering_grip := clampf(absf(speed) / 7.0, 0.0, 1.0)
 	var steering: Vector2 = _profile.steering
 	var high_speed_grip := lerpf(steering.x, steering.y, clampf(absf(speed) / current_top_speed(), 0.0, 1.0))
 	var road_grip := weather.steering_factor if weather else 1.0
-	rotate_y(steer * signf(speed) * steering_grip * high_speed_grip * road_grip * delta)
+	var turn := steer * signf(speed) * steering_grip * high_speed_grip * road_grip
+	var sliding := speed > DRIFT_MIN_SPEED and (handbrake or drifting)
+	if sliding:
+		turn *= 1.55
+	rotate_y(turn * delta)
+	_update_slip(turn * delta, handbrake, drive, road_grip, delta)
 
-	var forward := -global_basis.z
+	var travel := (-global_basis.z).rotated(Vector3.UP, slip)
 	_fall_speed = 0.0 if is_on_floor() else _fall_speed - GRAVITY * delta
-	velocity = forward * speed + Vector3.UP * _fall_speed
+	velocity = travel * speed + Vector3.UP * _fall_speed
+	var incoming := velocity
 	move_and_slide()
 	if is_on_wall():
 		# Keep motion along the rail and shed the speed directed into it.
 		var factor := weather.speed_factor if weather else 1.0
-		speed = clampf(velocity.dot(forward), -REVERSE_SPEED * factor, _profile.boost_speed * factor)
+		speed = clampf(velocity.dot(travel), -REVERSE_SPEED * factor, _profile.boost_speed * factor)
+		slip *= 0.5
+		var closing_speed := 0.0
+		for index in range(get_slide_collision_count()):
+			var contact := get_slide_collision(index)
+			var normal := contact.get_normal()
+			if absf(normal.y) > 0.45:
+				continue
+			var other_velocity := contact.get_collider_velocity()
+			var other := contact.get_collider()
+			if other != null and other.has_method("traffic_velocity"):
+				other_velocity = other.traffic_velocity()
+			closing_speed = maxf(closing_speed, -(incoming - other_velocity).dot(normal))
+		if closing_speed > 0.0:
+			impact.emit(closing_speed)
 	_update_wheels(steer, delta)
+	if is_physics_processing() and not get_tree().paused:
+		_audio.advance(delta, throttle, steer)
+
+
+func _update_nitro(wants_nitro: bool, delta: float) -> void:
+	var burning := wants_nitro and nitro > 0.0 and speed > 2.0
+	if burning and not nitro_active:
+		Audio.play_from(self, &"boost", -2.0, 1.15)
+	nitro_active = burning
+	if nitro_active:
+		nitro = maxf(0.0, nitro - delta / NITRO_SECONDS)
+		boost_time = maxf(boost_time, 0.12)
+
+
+func _update_slip(yaw_step: float, handbrake: bool, drive: float, road_grip: float, delta: float) -> void:
+	# The direction of travel lags behind the body; grip pulls it back in line.
+	slip = clampf(slip - yaw_step, -MAX_SLIP, MAX_SLIP)
+	var grip := 16.0
+	if speed < DRIFT_MIN_SPEED * 0.6:
+		grip = 24.0
+	elif handbrake:
+		grip = 1.3
+	elif drifting and drive > 0.0:
+		grip = 2.4
+	elif drifting:
+		grip = 5.0
+	slip *= exp(-grip * clampf(road_grip, 0.55, 1.0) * delta)
+	speed -= absf(slip) * 3.0 * delta if speed > 0.0 else 0.0
+	var was_drifting := drifting
+	drifting = absf(slip) > DRIFT_SLIP and speed > DRIFT_MIN_SPEED * 0.8
+	if drifting:
+		var gain := NITRO_GAIN * delta * clampf(absf(slip) / 0.45, 0.0, 1.0) * clampf(speed / 30.0, 0.0, 1.0)
+		nitro = minf(1.0, nitro + gain)
+		_drift_time += delta
+		_drift_gain += gain
+	elif was_drifting:
+		if _drift_time >= 0.5:
+			drift_finished.emit(_drift_time, _drift_gain)
+		_drift_time = 0.0
+		_drift_gain = 0.0
 
 
 func _tune_body_materials() -> void:
@@ -89,6 +195,8 @@ func _tune_body_materials() -> void:
 			paint.clearcoat = 0.68
 			paint.clearcoat_roughness = 0.24
 			_body.set_surface_override_material(index, paint)
+			_paints.append(paint)
+			_factory_colors.append(original.albedo_color)
 		elif original.resource_name == "Lamp_Red":
 			_brake_lights = original.duplicate()
 			_brake_lights.emission_enabled = true
@@ -122,6 +230,12 @@ func _create_headlights() -> void:
 		_headlights.append(light)
 
 
+func apply_livery(index: int) -> void:
+	livery = clampi(index, 0, Vehicles.LIVERIES.size() - 1)
+	for i in range(_paints.size()):
+		Vehicles.paint(_paints[i], vehicle_id, _factory_colors[i], livery)
+
+
 func set_headlights(active: bool) -> void:
 	if headlights_on == active:
 		return
@@ -130,6 +244,15 @@ func set_headlights(active: bool) -> void:
 		light.visible = active
 	if _front_lamps:
 		_front_lamps.emission_energy_multiplier = 1.8 if active else 0.0
+
+
+func toggle_headlights() -> void:
+	set_headlights(not headlights_on)
+	Audio.play_from(self, &"headlights", 0.0, 1.0 if headlights_on else 0.85)
+
+
+func stop_audio() -> void:
+	_audio.silence()
 
 
 func _update_wheels(steer: float, delta: float) -> void:
@@ -142,7 +265,7 @@ func _update_wheels(steer: float, delta: float) -> void:
 
 
 func _update_speed(drive: float, delta: float) -> void:
-	var speed_limit := weather.speed_factor if weather else 1.0
+	var speed_limit := speed_multiplier * (weather.speed_factor if weather else 1.0)
 	var acceleration: float = _profile.acceleration * (weather.acceleration_factor if weather else 1.0)
 	if is_zero_approx(drive):
 		speed = move_toward(speed, 0.0, COAST_DECELERATION * delta)
@@ -157,8 +280,25 @@ func _update_speed(drive: float, delta: float) -> void:
 		speed = move_toward(speed, REVERSE_SPEED * speed_limit * drive, acceleration * 0.55 * delta)
 
 
+## Normalised engine speed shared by the engine sound and the tachometer:
+## 0.63 at idle, about 1.62 at top speed under full load, higher while boosting.
+func engine_rev() -> float:
+	var reverse := speed < -0.6
+	var load := maxf(0.0, -throttle if reverse else throttle)
+	var ratio := clampf(absf(speed) / maxf(1.0, current_top_speed()), 0.0, 1.15)
+	return 0.63 + 0.82 * ratio + 0.17 * load
+
+
 func current_top_speed() -> float:
-	return _profile.top_speed * (weather.speed_factor if weather else 1.0)
+	return _profile.top_speed * speed_multiplier * (weather.speed_factor if weather else 1.0)
+
+
+func front_length() -> float:
+	return _profile.collision_size.z * 0.5
+
+
+func front_position() -> Vector3:
+	return position - basis.z * front_length()
 
 
 func set_spawn(pose: Transform3D) -> void:
@@ -170,6 +310,7 @@ func activate_boost() -> void:
 	var factor := weather.speed_factor if weather else 1.0
 	boost_time = _profile.boost_seconds
 	speed = minf(speed + _profile.boost_push * factor, _profile.boost_speed * factor)
+	Audio.play_from(self, &"boost")
 
 
 func respawn() -> void:
@@ -177,7 +318,16 @@ func respawn() -> void:
 	velocity = Vector3.ZERO
 	speed = 0.0
 	boost_time = 0.0
+	throttle = 0.0
+	nitro = 0.0
+	nitro_active = false
+	slip = 0.0
+	drifting = false
+	_drift_time = 0.0
+	_drift_gain = 0.0
 	_fall_speed = 0.0
+	rough_surface = false
 	_wheel_angle = 0.0
+	stop_audio()
 	_update_wheels(0.0, 0.0)
 	reset_physics_interpolation()

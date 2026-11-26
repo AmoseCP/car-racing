@@ -12,6 +12,8 @@ uniform float base_specular = 0.38;
 uniform float snow_retention : hint_range(0.0, 1.0) = 0.4;
 uniform float rain : hint_range(0.0, 1.0) = 0.0;
 uniform float snow : hint_range(0.0, 1.0) = 0.0;
+uniform vec4 season_tint : source_color = vec4(1.0);
+uniform float seasonal_snow : hint_range(0.0, 1.0) = 0.0;
 
 varying vec2 terrain_position;
 
@@ -21,13 +23,14 @@ void vertex() {
 
 void fragment() {
 	vec2 tiles = UV * texture_scale;
-	vec3 painted_surface = texture(surface_color, tiles).rgb * surface_tint.rgb;
+	vec3 painted_surface = texture(surface_color, tiles).rgb * surface_tint.rgb * season_tint.rgb;
 	float roughness = texture(surface_roughness, tiles).r * roughness_strength;
 	float packed_snow = 0.0;
-	if (snow > 0.0) {
+	float snow_cover = max(snow * snow_retention, seasonal_snow);
+	if (snow_cover > 0.0) {
 		vec2 p = terrain_position;
 		float drift = sin(dot(p, vec2(0.31, 0.57))) * sin(dot(p, vec2(0.29, -0.43)));
-		packed_snow = snow * snow_retention * (0.83 + 0.17 * drift);
+		packed_snow = snow_cover * (0.83 + 0.17 * drift);
 	}
 	vec3 wet_surface = mix(painted_surface, painted_surface * vec3(0.58, 0.66, 0.74), rain);
 	float snow_grain = mix(0.73, 0.93, roughness);

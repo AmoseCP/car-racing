@@ -12,12 +12,13 @@ func _ready() -> void:
 		$Viewport.msaa_3d = Viewport.MSAA_DISABLED
 
 
-func show_vehicle(id: StringName) -> void:
+func show_vehicle(id: StringName, livery := 0) -> void:
 	if is_instance_valid(_model):
 		_turntable.remove_child(_model)
 		_model.queue_free()
 	_turntable.rotation.y = 0.0
 	_model = Vehicles.instantiate_model(id)
+	Vehicles.paint_model(_model, id, livery)
 	_turntable.add_child(_model)
 
 
