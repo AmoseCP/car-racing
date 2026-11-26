@@ -2,7 +2,7 @@
 
 # CarRacing
 
-CarRacing 是使用 Godot 4 制作的 3D 驾驶游戏原型。可驾驶 GT 赛车、拉力赛车、耐力原型车或六轮大货车，在公路远行中连续穿过沙漠、城市、隧道、草原和森林，也可以参加赛道练习。不同车辆拥有各自的加速、极速和操控特性。大货车约长 8.6 米，起步更慢、转向更稳，刹车需要预留更长距离。雨雪会影响车速和抓地力，天黑时前灯会自动亮起。
+CarRacing 是使用 Godot 4 制作的 3D 驾驶游戏原型。可驾驶 GT 赛车、拉力赛车、耐力原型车或六轮平板大货车，在公路远行中连续穿过沙漠、城市、隧道、草原和森林，也可以参加赛道练习。不同车辆拥有各自的加速、极速和操控特性。大货车约长 6.9 米，低矮的货物不会挡住车头，起步更慢、转向更稳，刹车需要预留更长距离。雨雪会影响车速和抓地力，天黑时前灯会自动亮起。
 
 车速、车辆性能和道路限速统一使用 **mph（英里/小时）**。草原限速 55 mph，森林与隧道 45 mph，城市 30 mph，沙漠 65 mph。持续超出限速 11 mph 或低于限速 10 mph 会扣分，正常等红灯、STOP 停车和跟随慢车时豁免低速处罚。
 
@@ -19,7 +19,9 @@ CarRacing 是使用 Godot 4 制作的 3D 驾驶游戏原型。可驾驶 GT 赛�
 从 [GitHub Releases](https://github.com/AmoseCP/car-racing/releases/latest) 下载，无需安装 Godot。
 
 - **Windows 电脑 / 掌机**：[单文件 EXE](https://github.com/AmoseCP/car-racing/releases/latest/download/CarRacing-Windows-x64.exe)，下载后直接运行；[完整 ZIP](https://github.com/AmoseCP/car-racing/releases/latest/download/CarRacing-Windows-x64.zip) 包含程序、操作说明和第三方许可。
-- **Mac（Apple 芯片 / Intel）**：[Universal ZIP](https://github.com/AmoseCP/car-racing/releases/latest/download/CarRacing-macOS-Universal.zip)，解压后打开 `macOS/CarRacing.app`。应用使用 ad-hoc 签名，尚未通过 Apple 公证。
+- **Mac（M 系列芯片）**：[Apple Silicon ZIP](https://github.com/AmoseCP/car-racing/releases/latest/download/CarRacing-macOS-AppleSilicon.zip)，解压后打开 `CarRacing-macOS-AppleSilicon/CarRacing.app`。
+- **Mac（Intel 芯片）**：[Intel ZIP](https://github.com/AmoseCP/car-racing/releases/latest/download/CarRacing-macOS-Intel.zip)，解压后打开 `CarRacing-macOS-Intel/CarRacing.app`。不确定时，可在「苹果菜单 → 关于本机」查看芯片型号。
+- Mac 应用使用 ad-hoc 签名，尚未通过 Apple 公证；首次打开若被拦截，请右键选择「打开」。
 - 单独下载 EXE 时，第三方素材与引擎的署名、版权和许可见同一发布页的 `THIRD_PARTY_LICENSES.zip`。
 
 进入「赛车选择 → 大货车」可体验新增车型。Mac 版已实测；Windows 版已完成导出和资源包启动检查，尚未进行 Windows 实机测试。
@@ -50,7 +52,7 @@ CarRacing 是使用 Godot 4 制作的 3D 驾驶游戏原型。可驾驶 GT 赛�
 
 ## 从源码运行
 
-用 Godot 4.7.2 打开 `project.godot`，等待素材导入后按 F5。安装同版本的 Godot 导出模板后，可使用项目中的 `Windows x64` 或 `macOS Universal` 预设导出发行版。公开源码可独立运行，不需要编辑器 MCP 插件。
+用 Godot 4.7.2 打开 `project.godot`，等待素材导入后按 F5。安装同版本的 Godot 导出模板后，可使用项目中的 `Windows x64`、`macOS Apple Silicon` 或 `macOS Intel` 预设导出发行版。公开源码可独立运行，不需要编辑器 MCP 插件。
 
 ## 素材署名
 

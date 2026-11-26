@@ -25,6 +25,8 @@ Pine Sapling Small: https://polyhaven.com/a/pine_sapling_small
 Fir Sapling (simplified model and rendered background foliage): https://polyhaven.com/a/fir_sapling
 
 Traffic sedan, SUV, taxi, delivery van and pickup from Kenney Car Kit 3.1 (CC0 1.0).
+Player heavy truck: "delivery-flat" from Kenney Car Kit 3.1 (CC0 1.0), scaled with a
+second rear axle, tarp load and lamps added in racing_prototype/art/truck/build_truck_scene.gd.
 https://kenney.nl/assets/car-kit
 
 Vehicle audio
