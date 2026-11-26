@@ -20,6 +20,10 @@ const SPEED_LIMITS := {&"grassland": 55, &"forest": 45, &"city": 30, &"tunnel": 
 const STATION_EVERY := 4
 const STATION_FROM := 60.0
 const STATION_TO := 115.0
+## Clear height under the fuel-station canopy: above every chase-camera height.
+const CANOPY_CLEARANCE := 7.5
+const CANOPY_INSET := 5.0
+const CANOPY_WIDTH := 12.5
 
 var origin := 0.0
 var weather_materials: Array[ShaderMaterial] = []
@@ -133,6 +137,18 @@ func next_station(progress: float) -> float:
 	return INF
 
 
+## Height of the lowest roof above a point (INF when the sky is open).
+func ceiling_at(point: Vector3) -> float:
+	var location := road_location(point)
+	var index := floori(location.x / CHUNK)
+	var local := location.x - index * CHUNK
+	var across := location.y - (SHOULDER + 0.6)
+	if has_station(index) and local > STATION_FROM + CANOPY_INSET - 1.0 and (
+			local < STATION_TO - CANOPY_INSET + 1.0) and absf(across) < CANOPY_WIDTH * 0.5 + 1.0:
+		return CANOPY_CLEARANCE
+	return INF
+
+
 func has_overhead_cover(point: Vector3) -> bool:
 	var location := road_location(point)
 	var stage := fposmod(location.x, CHUNK * ROUTE.size()) - 8.0 * CHUNK
@@ -211,13 +227,14 @@ func _fuel_station(chunk: Node3D, start: float) -> void:
 	_strip(chunk, start, 4.15, HALF_ROAD - 0.5, 0.031, 0.031, lane_paint, STATION_FROM, STATION_TO)
 	_strip(chunk, start, 4.15, 4.35, 0.034, 0.034, stripe, STATION_FROM, STATION_TO, true)
 	var middle := (STATION_FROM + STATION_TO) * 0.5
-	var length := STATION_TO - STATION_FROM - 10.0
+	var length := STATION_TO - STATION_FROM - CANOPY_INSET * 2.0
 	var x := road_x(start + middle)
-	_box(chunk, Vector3(12.5, 0.45, length), Vector3(x + SHOULDER + 0.6, 5.4, -middle), canopy)
-	_box(chunk, Vector3(12.6, 0.16, length + 0.1), Vector3(x + SHOULDER + 0.6, 5.12, -middle), trim)
+	var roof := CANOPY_CLEARANCE + 0.16
+	_box(chunk, Vector3(CANOPY_WIDTH, 0.45, length), Vector3(x + SHOULDER + 0.6, roof + 0.225, -middle), canopy)
+	_box(chunk, Vector3(CANOPY_WIDTH + 0.1, 0.16, length + 0.1), Vector3(x + SHOULDER + 0.6, CANOPY_CLEARANCE + 0.08, -middle), trim)
 	for z: float in [middle - length * 0.4, middle, middle + length * 0.4]:
 		var post_x := road_x(start + z) + SHOULDER + 5.8
-		_box(chunk, Vector3(0.36, 5.2, 0.36), Vector3(post_x, 2.6, -z), _rail)
+		_box(chunk, Vector3(0.36, roof, 0.36), Vector3(post_x, roof * 0.5, -z), _rail)
 		var pump_x := road_x(start + z) + SHOULDER + 1.6
 		_box(chunk, Vector3(0.8, 1.6, 0.55), Vector3(pump_x, 0.8, -z), trim)
 		_box(chunk, Vector3(0.82, 0.4, 0.57), Vector3(pump_x, 1.75, -z), canopy)
@@ -228,7 +245,7 @@ func _fuel_station(chunk: Node3D, start: float) -> void:
 	banner.pixel_size = 0.012
 	banner.modulate = Color("0f6f64")
 	banner.outline_size = 0
-	banner.position = Vector3(x + SHOULDER + 0.6, 5.42, -STATION_FROM - 4.7)
+	banner.position = Vector3(x + SHOULDER + 0.6, roof + 0.24, -STATION_FROM - CANOPY_INSET + 0.3)
 	chunk.add_child(banner)
 
 

@@ -28,6 +28,7 @@ var _raised := RAISED_OFFSET
 var _look := LOOK_OFFSET
 
 @onready var _car: CharacterBody3D = $"../Car"
+@onready var _track: Node3D = get_node_or_null("../Track")
 
 
 func _ready() -> void:
@@ -69,6 +70,7 @@ func _physics_process(delta: float) -> void:
 		safe = _clearance(anchor, arm)
 	_distance = minf(safe, lerpf(_distance, safe, 1.0 - exp(-7.0 * delta)))
 	global_position = anchor + arm.normalized() * _distance
+	_stay_below_roof()
 	_aim_at_track()
 
 
@@ -80,8 +82,18 @@ func snap_to_car() -> void:
 		_place_on_hood()
 	else:
 		global_position = _car.global_position + _chase_offset().rotated(Vector3.UP, _heading)
+		_stay_below_roof()
 		_aim_at_track()
 	reset_physics_interpolation()
+
+
+func _stay_below_roof() -> void:
+	# Roofs without collision (fuel-station canopies) must never sit between
+	# the lens and the car, so keep the camera under them.
+	if _track == null or not _track.has_method("ceiling_at"):
+		return
+	var ceiling: float = _track.ceiling_at(global_position)
+	global_position.y = minf(global_position.y, ceiling - 0.6)
 
 
 func _chase_offset() -> Vector3:
