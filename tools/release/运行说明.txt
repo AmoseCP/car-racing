@@ -1,0 +1,17 @@
+CarRacing {{VERSION}}
+
+macOS：双击 CarRacing.app。首次打开若被拦截，请右键 → 打开。
+      M 系列芯片请用 Apple Silicon 版，Intel 芯片请用 Intel 版（「关于本机」可查看芯片）。
+Windows 电脑/掌机：运行 CarRacing.exe（单文件，资源已内嵌）。
+无需安装 Godot。
+
+键盘：WASD / 方向键驾驶；空格：刹车；S / ↓：刹车并倒车；Q：手刹；Shift：氮气；
+      H：车灯；C：视角；R：重新开始；Esc：暂停；F11：全屏（Mac 可按 Fn + F11）。
+手柄：RT 油门；LT 刹车/倒车；LB 刹车；左摇杆转向；A 手刹；B 氮气；X 车灯；
+      视图键 视角；Y 重试；菜单键 暂停。
+
+Mac 手柄：Xbox 手柄请在「系统设置 → 蓝牙」中配对（macOS 不支持 Xbox 有线连接）。
+可在「手柄与体感」页面确认手柄是否被识别。
+
+源码说明和完整操作表见 README.md，第三方许可见 LICENSES。
+更新内容见发布页：https://github.com/AmoseCP/car-racing/releases/tag/{{VERSION}}
